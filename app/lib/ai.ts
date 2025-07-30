@@ -198,34 +198,34 @@ export class AIService {
   }
 
   async analyzeResume(resumeText: string, jobDescription: string, jobTitle: string): Promise<AIResponse> {
-    const analysisPrompt = `Please analyze this resume for the position of "${jobTitle}" with the following job description:
+    const analysisPrompt = `Analyze this resume for "${jobTitle}" position. Job: ${jobDescription}
 
-Job Description:
-${jobDescription}
+Resume: ${resumeText}
 
-Please provide a comprehensive evaluation structured as JSON with the following format:
-
+Return ONLY valid JSON (no markdown, no extra text):
 {
-  "overall_score": <number between 0-100>,
-  "summary": "<brief overall assessment>",
-  "strengths": ["<strength 1>", "<strength 2>", ...],
-  "weaknesses": ["<weakness 1>", "<weakness 2>", ...],
-  "suggestions": ["<suggestion 1>", "<suggestion 2>", ...],
-  "ats_score": <number between 0-100>,
-  "ats_feedback": "<specific ATS optimization feedback>",
+  "overall_score": 85,
+  "ats_score": 82,
+  "summary": "Brief assessment here",
+  "strengths": ["strength 1", "strength 2"],
+  "weaknesses": ["weakness 1", "weakness 2"],
+  "suggestions": ["suggestion 1", "suggestion 2"],
+  "ATS": {
+    "score": 82,
+    "tips": ["tip 1", "tip 2"]
+  },
+  "keywords_found": ["keyword1", "keyword2"],
+  "keywords_missing": ["missing1", "missing2"],
   "sections": {
-    "contact": {"score": <0-100>, "feedback": "<feedback>"},
-    "summary": {"score": <0-100>, "feedback": "<feedback>"},
-    "experience": {"score": <0-100>, "feedback": "<feedback>"},
-    "education": {"score": <0-100>, "feedback": "<feedback>"},
-    "skills": {"score": <0-100>, "feedback": "<feedback>"}
+    "contact": {"score": 85, "feedback": "feedback"},
+    "summary": {"score": 80, "feedback": "feedback"},
+    "experience": {"score": 90, "feedback": "feedback"},
+    "education": {"score": 75, "feedback": "feedback"},
+    "skills": {"score": 88, "feedback": "feedback"}
   }
-}
+}`
 
-Resume text to analyze:
-${resumeText}`
-
-    return await this.chat(analysisPrompt)
+    return await this.chat(analysisPrompt, { temperature: 0.1, maxTokens: 4000 })
   }
 
   getAvailableProviders(): AIProvider[] {

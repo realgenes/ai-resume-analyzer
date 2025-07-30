@@ -7,7 +7,7 @@ interface Suggestion {
 
 interface ATSProps {
   score: number;
-  suggestions: Suggestion[];
+  suggestions: (Suggestion | string)[];
 }
 
 const ATS: React.FC<ATSProps> = ({ score, suggestions }) => {
@@ -51,18 +51,24 @@ const ATS: React.FC<ATSProps> = ({ score, suggestions }) => {
 
         {/* Suggestions list */}
         <div className="space-y-3">
-          {suggestions.map((suggestion, index) => (
-            <div key={index} className="flex items-start gap-3">
-              <img
-                src={suggestion.type === "good" ? "/icons/check.svg" : "/icons/warning.svg"}
-                alt={suggestion.type === "good" ? "Check" : "Warning"}
-                className="w-5 h-5 mt-1"
-              />
-              <p className={suggestion.type === "good" ? "text-green-700" : "text-amber-700"}>
-                {suggestion.tip}
-              </p>
-            </div>
-          ))}
+          {suggestions.map((suggestion, index) => {
+            const isString = typeof suggestion === 'string';
+            const type = isString ? "improve" : suggestion.type;
+            const tip = isString ? suggestion : suggestion.tip;
+            
+            return (
+              <div key={index} className="flex items-start gap-3">
+                <img
+                  src={type === "good" ? "/icons/check.svg" : "/icons/warning.svg"}
+                  alt={type === "good" ? "Check" : "Warning"}
+                  className="w-5 h-5 mt-1"
+                />
+                <p className={type === "good" ? "text-green-700" : "text-amber-700"}>
+                  {tip}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
 
