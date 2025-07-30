@@ -19,25 +19,25 @@ export default function Home() {
   const [resumes, setResumes] = useState<ResumeData[]>([]);
   const [loadingResumes, setLoadingResumes] = useState(false);
 
+  const loadResumes = async () => {
+    if (!isAuthenticated) return;
+    
+    setLoadingResumes(true);
+    try {
+      const userResumes = await getUserResumes();
+      setResumes(userResumes);
+    } catch (error) {
+      console.error('Failed to load resumes:', error);
+    } finally {
+      setLoadingResumes(false);
+    }
+  };
+
   useEffect(() => {
     if(!isAuthenticated) navigate('/auth?next=/');
   }, [isAuthenticated])
 
-  useEffect(() => {
-    const loadResumes = async () => {
-      if (!isAuthenticated) return;
-      
-      setLoadingResumes(true);
-      try {
-        const userResumes = await getUserResumes();
-        setResumes(userResumes);
-      } catch (error) {
-        console.error('Failed to load resumes:', error);
-      } finally {
-        setLoadingResumes(false);
-      }
-    }
-
+  useEffect(() => {    
     loadResumes()
   }, [isAuthenticated, getUserResumes]);
 
@@ -62,7 +62,7 @@ export default function Home() {
       {!loadingResumes && resumes.length > 0 && (
         <div className="resumes-section">
           {resumes.map((resume) => (
-              <ResumeCard key={resume.id} resume={resume} />
+              <ResumeCard key={resume.id} resume={resume} onDelete={loadResumes} />
           ))}
         </div>
       )}
