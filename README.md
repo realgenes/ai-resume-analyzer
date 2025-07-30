@@ -256,3 +256,4 @@ detailed explanations, cool features, and exercises to boost your skills. Give i
   <img src="public/readme/jsmpro.webp" alt="Project Banner">
 </a>
 # ai-resume-analyzer
+# resume-analyzer
