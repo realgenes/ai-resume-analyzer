@@ -186,3 +186,4 @@ For additional help, please open an issue in the GitHub repository.
 ---
 
 **Built with ❤️ by Shishupal**
+# ai-resume-analyzer
