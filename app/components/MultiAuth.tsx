@@ -2,6 +2,8 @@ import { useState, useCallback, memo } from 'react';
 import { useAppStore } from '~/lib/store';
 import { EmailAuth } from './EmailAuth';
 
+import { getURL } from '~/lib/getURL';
+
 export const MultiAuth = memo(function MultiAuth() {
   const [authMethod, setAuthMethod] = useState<'oauth' | 'email'>('oauth');
   const { signIn, isLoading } = useAppStore();
@@ -33,10 +35,12 @@ export const MultiAuth = memo(function MultiAuth() {
     // You'll need to modify your signIn method to accept a provider parameter
     try {
       const { supabase } = await import('~/lib/supabase');
+      const url = `${getURL()}auth/callback`;
+      console.log('🐛 DEBUG - OAuth redirect URL:', url);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider as any,
         options: {
-          redirectTo: `${import.meta.env.VITE_APP_URL}/auth/callback`
+          redirectTo: url
         }
       });
       

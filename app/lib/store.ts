@@ -3,6 +3,8 @@ import { supabase, type ResumeData, type Profile } from "./supabase";
 import { aiService, type AIResponse } from "./ai";
 import type { User, AuthError } from '@supabase/supabase-js'
 
+import { getURL } from './getURL';
+
 interface AppStore {
   // Auth State
   isLoading: boolean;
@@ -57,10 +59,12 @@ export const useAppStore = create<AppStore>((set, get) => {
   const signIn = async (): Promise<void> => {
     setLoading(true);
     try {
+      const url = `${getURL()}auth/callback`;
+      console.log('🐛 DEBUG - Auth redirect URL:', url);
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google', // Changed from github to google
+        provider: 'google',
         options: {
-          redirectTo: `${import.meta.env.VITE_APP_URL}/auth/callback`
+          redirectTo: url
         }
       });
       
@@ -304,11 +308,13 @@ export const useAppStore = create<AppStore>((set, get) => {
   const signUpWithEmail = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
+      const url = `${getURL()}auth/callback`;
+      console.log('🐛 DEBUG - Signup redirect URL:', url);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          emailRedirectTo: `${import.meta.env.VITE_APP_URL}/auth/callback`
+          emailRedirectTo: url
         }
       });
 
@@ -360,8 +366,10 @@ export const useAppStore = create<AppStore>((set, get) => {
   const resetPassword = async (email: string): Promise<void> => {
     setLoading(true);
     try {
+      const url = `${getURL()}auth/reset-password`;
+      console.log('🐛 DEBUG - Reset password redirect URL:', url);
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${import.meta.env.VITE_APP_URL}/auth/reset-password`
+        redirectTo: url
       });
 
       if (error) throw error;
@@ -378,11 +386,13 @@ export const useAppStore = create<AppStore>((set, get) => {
   const resendConfirmation = async (email: string): Promise<void> => {
     setLoading(true);
     try {
+      const url = `${getURL()}auth/callback`;
+      console.log('🐛 DEBUG - Resend confirmation redirect URL:', url);
       const { error } = await supabase.auth.resend({
         type: 'signup',
         email: email,
         options: {
-          emailRedirectTo: `${import.meta.env.VITE_APP_URL}/auth/callback`
+          emailRedirectTo: url
         }
       });
 
