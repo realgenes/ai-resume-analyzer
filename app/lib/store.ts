@@ -21,6 +21,7 @@ interface AppStore {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (email: string, password: string) => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  resendConfirmation: (email: string) => Promise<void>;
 
   // File Storage Methods
   uploadFile: (file: File, bucket: string, path?: string) => Promise<string | null>;
@@ -374,6 +375,28 @@ export const useAppStore = create<AppStore>((set, get) => {
     }
   };
 
+  const resendConfirmation = async (email: string): Promise<void> => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `https://resume-analyzer-eta-one.vercel.app/auth/callback`
+        }
+      });
+
+      if (error) throw error;
+
+      set({
+        error: 'Confirmation email sent. Please check your inbox.',
+        isLoading: false
+      });
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Resend confirmation failed');
+    }
+  };
+
   return {
     // State
     isLoading: true,
@@ -392,6 +415,7 @@ export const useAppStore = create<AppStore>((set, get) => {
     signInWithEmail,
     signUpWithEmail,
     resetPassword,
+    resendConfirmation,
 
     // File Methods
     uploadFile,
