@@ -12,20 +12,21 @@ const Navbar = () => {
 
     return (
         <nav className="navbar">
-            <Link to="/">
-                <p className="text-2xl font-bold text-gradient">RESUMIND</p>
+            <Link to="/" className="flex items-center gap-2">
+                <div className="size-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-400 shadow-md" />
+                <p className="text-xl sm:text-2xl font-extrabold tracking-tight text-gradient">RESUMIND</p>
             </Link>
-            
-            <div className="flex items-center gap-4">
+
+            <div className="flex items-center gap-3 sm:gap-4">
                 {isAuthenticated ? (
                     <>
-                        <Link to="/upload" className="primary-button w-fit">
+                        <Link to="/upload" className="primary-button w-fit text-sm sm:text-base">
                             Upload Resume
                         </Link>
                         <UserDropdown />
                     </>
                 ) : (
-                    <Link to="/auth" className="primary-button w-fit">
+                    <Link to="/auth" className="primary-button w-fit text-sm sm:text-base">
                         Sign In
                     </Link>
                 )}

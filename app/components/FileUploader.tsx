@@ -31,7 +31,7 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
             <div {...getRootProps()}>
                 <input {...getInputProps()} />
 
-                <div className="space-y-4 cursor-pointer">
+                <div className={`uplader-drag-area space-y-4 ${isDragActive ? 'ring-2 ring-indigo-400/50 scale-[1.01]' : ''}`}>
                     {file ? (
                         <div className="uploader-selected-file" onClick={(e) => e.stopPropagation()}>
                             <img src="/images/pdf.png" alt="pdf" className="size-10" />
@@ -56,12 +56,12 @@ const FileUploader = ({ onFileSelect }: FileUploaderProps) => {
                             <div className="mx-auto w-16 h-16 flex items-center justify-center mb-2">
                                 <img src="/icons/info.svg" alt="upload" className="size-20" />
                             </div>
-                            <p className="text-lg text-gray-500">
+                            <p className="text-base sm:text-lg text-gray-500">
                                 <span className="font-semibold">
                                     Click to upload
                                 </span> or drag and drop
                             </p>
-                            <p className="text-lg text-gray-500">PDF (max {formatSize(maxFileSize)})</p>
+                            <p className="text-sm sm:text-base text-gray-500">PDF (max {formatSize(maxFileSize)})</p>
                         </div>
                     )}
                 </div>

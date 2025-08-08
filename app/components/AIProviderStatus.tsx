@@ -79,14 +79,14 @@ export function AIProviderStatus() {
   const provider = providerInfo[activeProvider];
 
   return (
-    <div className="bg-green-500/20 backdrop-blur-sm rounded-lg p-4 border border-green-500/30">
-      <h3 className="text-white font-medium mb-2 flex items-center gap-2">
+    <div className="bg-green-500/10 backdrop-blur-sm rounded-lg p-4 border border-green-500/30 drop-shadow-2xl">
+      <h3 className="text-black font-medium mb-2 flex items-center gap-2">
         <span className="w-2 h-2 bg-green-500 rounded-full"></span>
         AI Provider Active
       </h3>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <span className="text-white/90 text-sm font-medium">{provider.name}</span>
+          <span className="text-black/90 text-sm font-medium">{provider.name}</span>
           <div className="flex items-center gap-2">
             {provider.free && (
               <span className="text-green-400 text-xs bg-green-500/20 px-2 py-1 rounded">
@@ -98,7 +98,7 @@ export function AIProviderStatus() {
             </span>
           </div>
         </div>
-        <p className="text-white/70 text-sm">{provider.description}</p>
+        <p className="text-black/70 text-sm">{provider.description}</p>
       </div>
     </div>
   );

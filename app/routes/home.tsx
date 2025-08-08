@@ -41,11 +41,11 @@ export default function Home() {
     loadResumes()
   }, [isAuthenticated, getUserResumes]);
 
-  return <main className="bg-[url('/images/bg-main.svg')] bg-cover">
+  return <main>
     <Navbar />
 
     <section className="main-section">
-      <div className="page-heading py-16">
+      <div className="page-heading py-12 md:py-16">
         <h1>Track Your Applications & Resume Ratings</h1>
         {!loadingResumes && resumes?.length === 0 ? (
             <h2>No resumes found. Upload your first resume to get feedback.</h2>
@@ -69,7 +69,7 @@ export default function Home() {
 
       {!loadingResumes && resumes?.length === 0 && (
           <div className="flex flex-col items-center justify-center mt-10 gap-4">
-            <Link to="/upload" className="primary-button w-fit text-xl font-semibold">
+            <Link to="/upload" className="primary-button w-fit text-lg md:text-xl font-semibold">
               Upload Resume
             </Link>
           </div>

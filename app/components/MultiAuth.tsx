@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useCallback, memo } from 'react';
 import { useAppStore } from '~/lib/store';
 import { EmailAuth } from './EmailAuth';
 
-export function MultiAuth() {
+export const MultiAuth = memo(function MultiAuth() {
   const [authMethod, setAuthMethod] = useState<'oauth' | 'email'>('oauth');
   const { signIn, isLoading } = useAppStore();
 
@@ -28,7 +28,7 @@ export function MultiAuth() {
     }
   ];
 
-  const handleOAuthSignIn = async (provider: string) => {
+  const handleOAuthSignIn = useCallback(async (provider: string) => {
     // Temporarily update the provider in your store
     // You'll need to modify your signIn method to accept a provider parameter
     try {
@@ -36,7 +36,7 @@ export function MultiAuth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider as any,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `https://resume-analyzer-eta-one.vercel.app/auth/callback`
         }
       });
       
@@ -47,14 +47,22 @@ export function MultiAuth() {
     } catch (error) {
       console.error(`${provider} OAuth error:`, error);
     }
-  };
+  }, []);
+
+  const setOAuthMethod = useCallback(() => {
+    setAuthMethod('oauth');
+  }, []);
+
+  const setEmailMethod = useCallback(() => {
+    setAuthMethod('email');
+  }, []);
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col items-center">
       {/* Auth Method Toggle */}
-      <div className="flex mb-8 bg-gray-100 rounded-lg p-1 max-w-md mx-auto">
+      <div className="flex mb-8 bg-gray-100 rounded-lg p-1 max-w-md w-full">
         <button
-          onClick={() => setAuthMethod('oauth')}
+          onClick={setOAuthMethod}
           className={`flex-1 py-3 px-6 rounded-md text-sm font-medium transition-colors ${
             authMethod === 'oauth' 
               ? 'bg-white text-blue-600 shadow-sm' 
@@ -64,7 +72,7 @@ export function MultiAuth() {
           Social Login
         </button>
         <button
-          onClick={() => setAuthMethod('email')}
+          onClick={setEmailMethod}
           className={`flex-1 py-3 px-6 rounded-md text-sm font-medium transition-colors ${
             authMethod === 'email' 
               ? 'bg-white text-blue-600 shadow-sm' 
@@ -75,8 +83,7 @@ export function MultiAuth() {
         </button>
       </div>
 
-      <div className="max-w-md mx-auto">
-        {authMethod === 'oauth' ? (
+      <div className="max-w-md w-full">{authMethod === 'oauth' ? (
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-center mb-4 text-gray-800">Sign in with Social Account</h3>
             
@@ -107,17 +114,7 @@ export function MultiAuth() {
         ) : (
           <EmailAuth />
         )}
-
-        {/* Alternative Authentication Methods */}
-        <div className="mt-8 p-4 bg-gray-50 rounded-md">
-          <h4 className="font-medium text-gray-900 mb-2">💡 Other Options:</h4>
-          <div className="text-sm text-gray-600 space-y-1">
-            <p><strong>Phone Authentication:</strong> Enable SMS OTP in Supabase</p>
-            <p><strong>Magic Links:</strong> Passwordless email login</p>
-            <p><strong>Anonymous Auth:</strong> For guest users</p>
-          </div>
-        </div>
       </div>
     </div>
   );
-}
+});

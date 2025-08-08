@@ -59,7 +59,7 @@ export const useAppStore = create<AppStore>((set, get) => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google', // Changed from github to google
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`
+          redirectTo: `https://resume-analyzer-eta-one.vercel.app/auth/callback`
         }
       });
       
@@ -307,7 +307,7 @@ export const useAppStore = create<AppStore>((set, get) => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`
+          emailRedirectTo: `https://resume-analyzer-eta-one.vercel.app/auth/callback`
         }
       });
 
@@ -360,7 +360,7 @@ export const useAppStore = create<AppStore>((set, get) => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/auth/reset-password`
+        redirectTo: `https://resume-analyzer-eta-one.vercel.app/auth/reset-password`
       });
 
       if (error) throw error;

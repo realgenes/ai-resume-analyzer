@@ -243,29 +243,29 @@ const Upload = () => {
     }
 
     return (
-        <main className="bg-[url('/images/bg-main.svg')] bg-cover">
+    <main>
             <Navbar />
 
             <section className="main-section">
-                <div className="page-heading py-16">
+        <div className="page-heading py-12 md:py-16">
                     <h1>Smart feedback for your dream job</h1>
                     {isProcessing ? (
                         <>
-                            <h2>{statusText}</h2>
-                            <img src="/images/resume-scan.gif" className="w-full" />
+                <h2>{statusText}</h2>
+                <img src="/images/resume-scan.gif" className="w-full rounded-2xl shadow-lg" />
                         </>
                     ) : (
-                        <h2>Drop your resume for an ATS score and improvement tips</h2>
+            <h2>Drop your resume for an ATS score and improvement tips</h2>
                     )}
                     
                     {!isProcessing && (
-                        <div className="mb-8 space-y-4">
+            <div className="mb-8 space-y-4 w-full">
                             <AIProviderStatus />
                         </div>
                     )}
                     
                     {!isProcessing && (
-                        <form id="upload-form" onSubmit={handleSubmit} className="flex flex-col gap-4 mt-8">
+            <form id="upload-form" onSubmit={handleSubmit} className="card w-full max-w-2xl mx-auto p-6 sm:p-8 flex flex-col gap-4 mt-4">
                             <div className="form-div">
                                 <label htmlFor="company-name">Company Name</label>
                                 <input type="text" name="company-name" placeholder="Company Name" id="company-name" required />
@@ -285,7 +285,7 @@ const Upload = () => {
                             </div>
 
                             <button 
-                                className="primary-button" 
+                className="primary-button" 
                                 type="submit"
                                 disabled={!file || isProcessing}
                             >
