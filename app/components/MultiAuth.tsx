@@ -36,7 +36,7 @@ export const MultiAuth = memo(function MultiAuth() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider as any,
         options: {
-          redirectTo: `https://resume-analyzer-eta-one.vercel.app/auth/callback`
+          redirectTo: `${import.meta.env.VITE_APP_URL}/auth/callback`
         }
       });
       
