@@ -21,3 +21,20 @@ export function getSupabaseAdmin(): SupabaseClient {
   });
   return cached;
 }
+
+export async function verifySupabaseToken(token: string) {
+  const supabase = getSupabaseAdmin();
+  
+  try {
+    const { data, error } = await supabase.auth.getUser(token);
+    
+    if (error) {
+      throw error;
+    }
+    
+    return data.user;
+  } catch (error) {
+    console.error('Token verification failed:', error);
+    throw new Error('Invalid or expired token');
+  }
+}

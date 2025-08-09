@@ -42,7 +42,9 @@ export class AIService {
 
   private async chatViaServerAPI(prompt: string, config?: AIConfig): Promise<AIResponse> {
     try {
-      const response = await fetch('/api/ai', {
+      console.log('🔵 Starting AI API call...');
+      
+      const apiPromise = fetch('/api/ai', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -57,15 +59,26 @@ export class AIService {
         })
       });
 
+      // Add 60-second timeout for AI calls
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error('AI request timeout after 60 seconds')), 60000);
+      });
+
+      console.log('🔵 Waiting for AI response...');
+      const response = await Promise.race([apiPromise, timeoutPromise]);
+
       if (!response.ok) {
         const errorData = await response.text();
+        console.error('🔴 AI API error:', response.status, errorData);
         throw new Error(`AI API error: ${response.status} - ${errorData}`);
       }
 
-      return await response.json();
+      const result = await response.json();
+      console.log('🟢 AI response received, length:', result.message?.content?.length || 0);
+      return result;
     } catch (error) {
-      console.error('Error calling AI API:', error);
-      throw new Error('Failed to get AI response. Please try again.');
+      console.error('🔴 Error calling AI API:', error);
+      throw new Error('Failed to get AI response: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   }
 

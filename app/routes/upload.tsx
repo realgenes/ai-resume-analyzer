@@ -1,4 +1,4 @@
-import {type FormEvent, useState} from 'react'
+import {type FormEvent, useState, useEffect} from 'react'
 import Navbar from "~/components/Navbar";
 import FileUploader from "~/components/FileUploader";
 import {AIProviderStatus} from "~/components/AIProviderStatus";
@@ -6,6 +6,7 @@ import {StorageStatus} from "~/components/StorageStatus";
 import {useAppStore} from "~/lib/store";
 import {useNavigate} from "react-router";
 import {convertPdfToImage} from "~/lib/pdf2img";
+import {extractTextFromFile} from "~/lib/textExtraction";
 import {generateUUID} from "~/lib/utils";
 import {prepareInstructions} from "../../constants";
 
@@ -15,8 +16,7 @@ const Upload = () => {
         isLoading, 
         uploadFile, 
         saveResumeData, 
-        analyzeResume,
-        extractTextFromImage 
+        analyzeResume
     } = useAppStore();
     
     const navigate = useNavigate();
@@ -39,36 +39,49 @@ const Upload = () => {
         jobDescription: string;
         file: File;
     }) => {
+        // Prevent multiple simultaneous submissions
+        if (isProcessing) {
+            console.log('🟡 Upload already in progress, ignoring duplicate request');
+            return;
+        }
+
         setIsProcessing(true);
 
         try {
+            console.log('🔵 Starting upload process...');
             setStatusText('Uploading the file...');
             // Upload PDF to Supabase Storage with user ID in path
-            const resumePath = await uploadFile(file, 'resumes', `${Date.now()}-${file.name}`);
+            const resumePath = await uploadFile(file, 'resumes');
             if (!resumePath) {
-                setStatusText('Error: Failed to upload file');
+                console.error('🔴 Resume upload failed');
+                setStatusText('Error: Failed to upload file. Please check your internet connection and try again.');
                 return;
             }
+            console.log('🟢 Resume uploaded successfully:', resumePath);
 
             setStatusText('Converting to image...');
             const imageFile = await convertPdfToImage(file);
             if (!imageFile.file) {
+                console.error('🔴 PDF to image conversion failed:', imageFile.error);
                 setStatusText('Error: Failed to convert PDF to image');
                 return;
             }
+            console.log('🟢 PDF converted to image successfully:', imageFile.file.name, 'Size:', imageFile.file.size);
 
             setStatusText('Uploading the image...');
-            const imagePath = await uploadFile(imageFile.file, 'images', `${Date.now()}-${imageFile.file.name}`);
+            const imagePath = await uploadFile(imageFile.file, 'images');
             if (!imagePath) {
-                setStatusText('Error: Failed to upload image');
+                console.error('🔴 Image upload failed');
+                setStatusText('Error: Failed to upload image. Please check your internet connection and try again.');
                 return;
             }
+            console.log('🟢 Image uploaded successfully:', imagePath);
 
-            setStatusText('Extracting text from image...');
-            const resumeText = await extractTextFromImage(imageFile.file);
+            setStatusText('Extracting text from file...');
+            const resumeText = await extractTextFromFile(file);
 
             setStatusText('Analyzing with AI...');
-            const aiResponse = await analyzeResume(imageFile.file, companyName, jobTitle, jobDescription);
+            const aiResponse = await analyzeResume(resumeText, jobDescription, jobTitle);
             
             // Parse the AI response
             let feedback;
@@ -216,30 +229,54 @@ const Upload = () => {
 
         } catch (error) {
             console.error('Analysis error:', error);
-            setStatusText(`Error: ${error instanceof Error ? error.message : 'Analysis failed'}`);
+            const errorMessage = error instanceof Error ? error.message : 'Analysis failed';
+            setStatusText(`Error: ${errorMessage}`);
+            
+            // Add specific handling for upload timeouts
+            if (errorMessage.includes('timeout')) {
+                setStatusText('Upload timed out. This may be due to a slow internet connection or large file size. Please try again with a smaller file or better connection.');
+            } else if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
+                setStatusText('Network error occurred. Please check your internet connection and try again.');
+            } else if (errorMessage.includes('bucket') || errorMessage.includes('policy')) {
+                setStatusText('Storage configuration error. Please contact support if this persists.');
+            }
         } finally {
-            setTimeout(() => setIsProcessing(false), 2000);
+            setTimeout(() => setIsProcessing(false), 3000); // Keep error message visible for 3 seconds
         }
     }
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const form = e.currentTarget.closest('form');
-        if(!form) return;
+        
+        // Prevent multiple submissions
+        if (isProcessing) {
+            console.log('🟡 Form submission already in progress, ignoring duplicate');
+            return;
+        }
+
+        const form = e.currentTarget;
+        if (!form) return;
+        
         const formData = new FormData(form);
 
         const companyName = formData.get('company-name') as string;
         const jobTitle = formData.get('job-title') as string;
         const jobDescription = formData.get('job-description') as string;
 
-        if(!file) return;
+        if (!file) return;
 
         handleAnalyze({ companyName, jobTitle, jobDescription, file });
     }
 
     // Redirect to auth if not authenticated
+    useEffect(() => {
+        if (!isLoading && !isAuthenticated) {
+            navigate('/auth?next=/upload');
+        }
+    }, [isLoading, isAuthenticated, navigate]);
+
+    // Return early if redirecting
     if (!isLoading && !isAuthenticated) {
-        navigate('/auth?next=/upload');
         return null;
     }
 
@@ -251,10 +288,15 @@ const Upload = () => {
         <div className="page-heading py-12 md:py-16">
                     <h1>Smart feedback for your dream job</h1>
                     {isProcessing ? (
-                        <>
-                <h2>{statusText}</h2>
-                <img src="/images/resume-scan.gif" className="w-full rounded-2xl shadow-lg" />
-                        </>
+                        <div className="text-center">
+                            <h2 className="mb-4">{statusText}</h2>
+                            <div className="mb-4">
+                                <div className="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div className="bg-blue-600 h-2.5 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                                </div>
+                            </div>
+                            <img src="/images/resume-scan.gif" className="w-full rounded-2xl shadow-lg" />
+                        </div>
                     ) : (
             <h2>Drop your resume for an ATS score and improvement tips</h2>
                     )}
@@ -287,7 +329,7 @@ const Upload = () => {
                             </div>
 
                             <button 
-                className="primary-button" 
+                className={`primary-button ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 type="submit"
                                 disabled={!file || isProcessing}
                             >

@@ -6,8 +6,9 @@ An intelligent resume analysis tool that provides ATS scores and improvement rec
 
 - **ATS Score Analysis**: Get detailed scores on how well your resume performs with Applicant Tracking Systems
 - **AI-Powered Feedback**: Receive personalized improvement suggestions using Google Gemini AI
-- **PDF Processing**: Upload and analyze PDF resumes with automatic text extraction using Gemini Vision
-- **Secure Storage**: Cloud storage integration with Supabase
+- **PDF Processing**: Upload and analyze PDF resumes with automatic text extraction
+- **Secure Authentication**: User authentication powered by Supabase Auth
+- **Cloud Storage**: File storage and database management with Supabase
 - **Responsive Design**: Modern, mobile-friendly interface built with React and Tailwind CSS
 - **Multi-Provider Support**: Ready for integration with OpenAI, Anthropic Claude, and Hugging Face
 
@@ -15,8 +16,8 @@ An intelligent resume analysis tool that provides ATS scores and improvement rec
 
 - **Frontend**: React, React Router v7, TypeScript
 - **Styling**: Tailwind CSS
-- **AI Integration**: Google Gemini (text analysis and vision)
-- **Database**: Supabase with Row Level Security
+- **AI Integration**: Google Gemini (text analysis)
+- **Authentication & Database**: Supabase (with Row Level Security)
 - **File Processing**: PDF.js, Gemini Vision API
 - **Build Tool**: Vite
 - **State Management**: Zustand
@@ -75,9 +76,10 @@ Create a `.env.local` file with the following variables:
 # Supabase Configuration (Required)
 VITE_SUPABASE_URL=your_supabase_project_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
 
 # Google Gemini AI (Required)
-VITE_GEMINI_API_KEY=your_gemini_api_key
+GEMINI_API_KEY=your_gemini_api_key
 
 # Optional: Other AI Providers
 # VITE_OPENAI_API_KEY=your_openai_key
@@ -186,4 +188,5 @@ For additional help, please open an issue in the GitHub repository.
 ---
 
 **Built with ❤️ by Shishupal**
+
 # ai-resume-analyzer

@@ -30,7 +30,6 @@ interface AppStore {
 
   // File Management
   uploadFile: (file: File, bucket: string, path?: string) => Promise<string | null>;
-  testConnection: () => Promise<boolean>;
   getFileUrl: (bucket: string, path: string) => Promise<string | null>;
   deleteFile: (bucket: string, path: string) => Promise<boolean>;
   listFiles: (bucket: string, prefix?: string) => Promise<string[]>;
@@ -54,8 +53,6 @@ interface AppStore {
   clearAnalysis: () => void;
   init: () => void;
 }
-
-let isInitialized = false;
 
 export const useAppStore = create<AppStore>((set, get) => {
   const setError = (error: string) => {
@@ -207,123 +204,35 @@ export const useAppStore = create<AppStore>((set, get) => {
   };
 
   // File Management Methods
-  const testConnection = async (): Promise<boolean> => {
-    try {
-      console.log('🔍 Testing Supabase connection...');
-      const { data, error } = await supabase.storage.listBuckets();
-      if (error) {
-        console.error('🔴 Connection test failed:', error);
-        return false;
-      }
-      console.log('🟢 Connection test successful');
-      return true;
-    } catch (error) {
-      console.error('🔴 Connection test error:', error);
-      return false;
-    }
-  };
-
-  const uploadFile = async (file: File, bucket: string, path?: string, retryCount = 0): Promise<string | null> => {
+  const uploadFile = async (file: File, bucket: string, path?: string): Promise<string | null> => {
     const { user } = get();
-    console.log('🔵 Upload attempt - User:', user ? user.id : 'No user');
-    console.log('🔵 Upload attempt - File:', file.name, 'Size:', file.size, 'Type:', file.type);
-    console.log('🔵 Upload attempt - Bucket:', bucket);
-    console.log('🔵 Upload attempt - Retry count:', retryCount);
-    
     if (!user) {
-      console.error('🔴 Upload failed: User not authenticated');
       setError('User not authenticated');
       return null;
     }
 
-    if (!file || file.size === 0) {
-      console.error('🔴 Upload failed: Invalid file');
-      setError('Invalid file provided');
-      return null;
-    }
-
-    // Don't set global loading state for individual file uploads
-    console.log('🔵 Starting upload process...');
-    
-    // Test connection before attempting upload
-    if (retryCount === 0) {
-      const connectionOk = await testConnection();
-      if (!connectionOk) {
-        setError('Unable to connect to storage service. Please check your internet connection.');
-        return null;
-      }
-    }
-    
+    setLoading(true);
     try {
-      // Generate unique filename with more entropy to avoid conflicts
+      // Generate unique filename
       const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substr(2, 9);
       const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-      const fileName = `${timestamp}_${randomId}_${sanitizedName}`;
+      const fileName = `${timestamp}_${sanitizedName}`;
       const fullPath = path ? `${path}/${fileName}` : `${user.id}/${fileName}`;
 
-      console.log('🔵 Upload path:', fullPath);
-      console.log('🔵 Calling supabase.storage.from(' + bucket + ').upload...');
-
-      const uploadPromise = supabase.storage
+      const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fullPath, file, {
           cacheControl: '3600',
           upsert: false
         });
 
-      // Add timeout to prevent hanging - increased to 60 seconds for larger files
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Upload timeout after 60 seconds. Please check your internet connection and try again.')), 60000);
-      });
-
-      console.log('🔵 Starting upload race between upload and timeout...');
-      const result = await Promise.race([uploadPromise, timeoutPromise]) as any;
-      
-      // Check if the result is an error from timeout
-      if (result instanceof Error) {
-        throw result;
-      }
-
-      const { data, error } = result;
-      console.log('🔵 Upload response:', { data, error });
-
       if (error) {
-        console.error('🔴 Upload error:', error);
-        
-        // Provide more specific error messages
-        if (error.message.includes('bucket')) {
-          throw new Error(`Storage bucket '${bucket}' not found. Please create the bucket in Supabase Dashboard.`);
-        } else if (error.message.includes('policy') || error.message.includes('row-level security')) {
-          throw new Error(`Storage access denied. Please set up RLS policies for bucket '${bucket}'. Run the SQL setup script in your Supabase SQL Editor.`);
-        } else if (error.message.includes('auth')) {
-          throw new Error('Authentication required for file upload.');
-        } else if (error.message.includes('network') || error.message.includes('fetch')) {
-          throw new Error('Network error during upload. Please check your internet connection and try again.');
-        }
-        
         throw error;
       }
 
-      console.log('🟢 Upload successful:', data.path);
+      set({ isLoading: false });
       return data.path;
     } catch (error) {
-      console.error('🔴 Upload failed:', error);
-      
-      // Retry logic for network errors or timeouts
-      const isRetryableError = error instanceof Error && (
-        error.message.includes('timeout') ||
-        error.message.includes('network') ||
-        error.message.includes('fetch') ||
-        error.message.includes('Failed to fetch')
-      );
-      
-      if (isRetryableError && retryCount < 2) {
-        console.log(`🔄 Retrying upload (attempt ${retryCount + 1}/3)...`);
-        await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000)); // Progressive delay
-        return uploadFile(file, bucket, path, retryCount + 1);
-      }
-      
       setError(error instanceof Error ? error.message : 'File upload failed');
       return null;
     }
@@ -532,45 +441,25 @@ export const useAppStore = create<AppStore>((set, get) => {
   const signUpWithEmail = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
-      console.log('🔵 Starting signup process for:', email);
-      console.log('🔵 Current origin:', window.location.origin);
-      
-      // Try signup without email confirmation first
       const { data, error } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
       });
 
-      console.log('🔵 Signup response:', { data, error });
-
       if (error) {
-        console.error('🔴 Signup error:', error);
         throw error;
       }
 
-      if (data.user) {
-        if (data.user.email_confirmed_at) {
-          console.log('� User created and email confirmed:', data.user);
-          set({ 
-            error: 'Account created successfully! You can now sign in.',
-            isLoading: false 
-          });
-        } else {
-          console.log('� User created but email not confirmed:', data.user);
-          set({ 
-            error: 'Account created! Please check your email for confirmation link, or try signing in if confirmation is disabled.',
-            isLoading: false 
-          });
-        }
-      } else {
-        console.log('🟡 User creation response unclear:', data);
+      if (data.user && !data.user.email_confirmed_at) {
         set({ 
-          error: 'Account may have been created. Please try signing in.',
+          error: 'Please check your email and click the confirmation link to complete signup.',
           isLoading: false 
         });
       }
     } catch (error) {
-      console.error('🔴 Signup failed:', error);
       setError(error instanceof Error ? error.message : 'Sign up failed');
     }
   };
@@ -687,16 +576,8 @@ export const useAppStore = create<AppStore>((set, get) => {
   const init = () => {
     console.log('🔥 Initializing Supabase auth listener...');
     
-    // Check if already initialized to prevent duplicate listeners
-    if (isInitialized) {
-      console.log('🟡 Already initialized, skipping duplicate init');
-      return;
-    }
-    
-    isInitialized = true;
-    
     // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('🔥 Auth state changed:', event, session ? session.user.email : 'signed out');
       
       if (session?.user) {
@@ -799,9 +680,6 @@ export const useAppStore = create<AppStore>((set, get) => {
     } catch (error) {
       console.warn('⚠️ Initial auth check failed, but continuing...', error);
     }
-
-    // Store the subscription for potential cleanup
-    (window as any).__supabaseAuthSubscription = subscription;
   };
 
   return {
@@ -827,7 +705,6 @@ export const useAppStore = create<AppStore>((set, get) => {
 
     // File Management
     uploadFile,
-    testConnection,
     getFileUrl,
     deleteFile,
     listFiles,

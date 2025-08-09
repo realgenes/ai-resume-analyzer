@@ -1,52 +1,47 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
+import { useAppStore } from '~/lib/store'
+import { supabase } from '~/lib/supabase'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
+  const { checkAuthStatus } = useAppStore()
 
   useEffect(() => {
     // Only run on client side
     if (typeof window === 'undefined') return;
 
-    // Dynamic import to avoid SSR issues
-    const setupAuthListener = async () => {
+    const handleAuthCallback = async () => {
       try {
-        const { auth } = await import('~/lib/firebase')
-        const { onAuthStateChanged } = await import('firebase/auth')
+        // Handle the auth callback from URL fragments
+        const { data, error } = await supabase.auth.getSession()
+        
+        if (error) {
+          console.error('Auth callback error:', error)
+          navigate('/auth?error=' + encodeURIComponent(error.message))
+          return
+        }
 
-        // Listen for auth state changes
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-          if (user) {
-            // User is signed in
-            navigate('/')
-          } else {
-            // User is signed out
-            navigate('/auth')
-          }
-        })
-
-        // Return cleanup function
-        return unsubscribe
+        if (data.session) {
+          console.log('✅ Session found, user authenticated')
+          // Check auth status to sync with our store
+          await checkAuthStatus()
+          navigate('/')
+        } else {
+          console.log('No session found, redirecting to auth')
+          navigate('/auth')
+        }
       } catch (error) {
-        console.error('Failed to setup auth listener:', error)
-        // Fallback to auth page if Firebase fails
-        navigate('/auth')
+        console.error('Auth callback error:', error)
+        navigate('/auth?error=' + encodeURIComponent('Authentication failed'))
       }
     }
 
-    let unsubscribe: (() => void) | undefined
-
-    setupAuthListener().then((cleanup) => {
-      unsubscribe = cleanup
-    })
-
-    // Cleanup subscription on unmount
-    return () => {
-      if (unsubscribe) {
-        unsubscribe()
-      }
-    }
-  }, [navigate])
+    // Small delay to ensure URL fragments are processed
+    const timeoutId = setTimeout(handleAuthCallback, 100)
+    
+    return () => clearTimeout(timeoutId)
+  }, [navigate, checkAuthStatus])
 
   return (
     <div className="flex items-center justify-center min-h-screen">

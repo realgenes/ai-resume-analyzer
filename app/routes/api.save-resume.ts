@@ -1,5 +1,4 @@
-import { getSupabaseAdmin } from "~/lib/supabaseAdmin.server";
-import { verifyIdToken } from "~/lib/firebaseAdmin.server";
+import { getSupabaseAdmin, verifySupabaseToken } from "~/lib/supabaseAdmin.server";
 
 export async function action({ request }: { request: Request }) {
   if (request.method !== 'POST') {
@@ -10,8 +9,8 @@ export async function action({ request }: { request: Request }) {
     const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
   if (!token) return new Response(JSON.stringify({ error: 'Missing Authorization' }), { status: 401 });
 
-    const decoded = await verifyIdToken(token);
-    const uid = decoded.uid;
+    const user = await verifySupabaseToken(token);
+    const uid = user.id;
 
     const body = await request.json();
     const now = new Date().toISOString();

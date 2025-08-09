@@ -50,9 +50,9 @@ export const UserDropdown = () => {
                 className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors"
             >
                 <div className="w-8 h-8 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                    {user.photoURL ? (
+                    {user.user_metadata?.avatar_url ? (
                         <img
-                            src={user.photoURL}
+                            src={user.user_metadata.avatar_url}
                             alt="User avatar"
                             className="w-8 h-8 rounded-full object-cover"
                         />
@@ -79,7 +79,7 @@ export const UserDropdown = () => {
                     {/* User Info */}
                     <div className="px-4 py-3 border-b border-gray-200">
                         <p className="text-sm font-medium text-gray-900">
-                            {user.displayName || user.email?.split('@')[0] || 'User'}
+                            {user.user_metadata?.full_name || user.email?.split('@')[0] || 'User'}
                         </p>
                         <p className="text-sm text-gray-500 truncate">
                             {user.email}

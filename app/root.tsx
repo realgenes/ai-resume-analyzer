@@ -28,9 +28,11 @@ export const links: Route.LinksFunction = () => [
 export function Layout({ children }: { children: React.ReactNode }) {
   const init = useAppStore(state => state.init);
 
+  const memoizedInit = useMemo(() => init, []);
+
   useEffect(() => {
-    init()
-  }, [init]);
+    memoizedInit();
+  }, [memoizedInit]);
 
   return (
     <html lang="en">

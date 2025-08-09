@@ -1,4 +1,4 @@
-// Supabase client configuration for storage only in hybrid setup
+// Supabase client configuration for authentication and storage
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -8,13 +8,12 @@ if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-// Create Supabase client for storage operations only
+// Create Supabase client for authentication and storage
 export const supabase = createClient(supabaseUrl, supabaseKey, {
   auth: {
-    // Disable auth since we're using Firebase for authentication
-    autoRefreshToken: false,
-    persistSession: false,
-    detectSessionInUrl: false
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
   }
 });
 

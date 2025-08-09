@@ -7,4 +7,9 @@ export default [
     route('/upload', 'routes/upload.tsx'),
     route('/resume/:id', 'routes/resume.tsx'),
     route('/wipe', 'routes/wipe.tsx'),
+    
+    // API routes
+    route('/api/ai', 'routes/api.ai.ts'),
+    route('/api/upload', 'routes/api.upload.ts'),
+    route('/api/save-resume', 'routes/api.save-resume.ts'),
 ] satisfies RouteConfig;
