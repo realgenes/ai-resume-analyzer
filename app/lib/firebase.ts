@@ -1,36 +1,49 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, connectAuthEmulator } from 'firebase/auth';
 
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID
-};
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
 
-// Check if we have the required environment variables
-if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
-  console.error('Missing Firebase environment variables:', firebaseConfig);
-  // For development, we'll create a dummy client to prevent crashes
-  // You'll need to set up your Firebase project and update .env.local
-}
+let app: any;
+let auth: any;
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+if (!isBrowser) {
+  // Server-side: create dummy objects to prevent errors during SSR
+  app = {} as any;
+  auth = {} as any;
+} else {
+  // Client-side: initialize Firebase normally
+  const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID
+  };
 
-// Initialize Firebase Auth only (Supabase handles storage and database)
-export const auth = getAuth(app);
+  // Check if we have the required environment variables
+  if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId) {
+    console.error('Missing Firebase environment variables:', firebaseConfig);
+    throw new Error('Firebase configuration is incomplete. Please check your environment variables.');
+  }
 
-// Connect to emulators in development (optional)
-if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {
-  try {
-    connectAuthEmulator(auth, 'http://localhost:9099');
-    console.log('Connected to Firebase Auth emulator');
-  } catch (error) {
-    console.warn('Failed to connect to Firebase Auth emulator:', error);
+  // Initialize Firebase
+  app = initializeApp(firebaseConfig);
+
+  // Initialize Firebase Auth only (Supabase handles storage and database)
+  auth = getAuth(app);
+
+  // Connect to emulators in development (optional)
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_FIREBASE_EMULATOR === 'true') {
+    try {
+      connectAuthEmulator(auth, 'http://localhost:9099');
+      console.log('Connected to Firebase Auth emulator');
+    } catch (error) {
+      console.warn('Failed to connect to Firebase Auth emulator:', error);
+    }
   }
 }
 
+export { auth };
 export default app;

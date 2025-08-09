@@ -1,25 +1,51 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { auth } from '~/lib/firebase'
-import { onAuthStateChanged } from 'firebase/auth'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Listen for auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in
-        navigate('/')
-      } else {
-        // User is signed out
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
+    // Dynamic import to avoid SSR issues
+    const setupAuthListener = async () => {
+      try {
+        const { auth } = await import('~/lib/firebase')
+        const { onAuthStateChanged } = await import('firebase/auth')
+
+        // Listen for auth state changes
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+            // User is signed in
+            navigate('/')
+          } else {
+            // User is signed out
+            navigate('/auth')
+          }
+        })
+
+        // Return cleanup function
+        return unsubscribe
+      } catch (error) {
+        console.error('Failed to setup auth listener:', error)
+        // Fallback to auth page if Firebase fails
         navigate('/auth')
       }
+    }
+
+    let unsubscribe: (() => void) | undefined
+
+    setupAuthListener().then((cleanup) => {
+      unsubscribe = cleanup
     })
 
     // Cleanup subscription on unmount
-    return () => unsubscribe()
+    return () => {
+      if (unsubscribe) {
+        unsubscribe()
+      }
+    }
   }, [navigate])
 
   return (

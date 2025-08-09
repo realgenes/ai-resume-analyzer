@@ -611,6 +611,8 @@ export const useAppStore = create<AppStore>((set, get) => {
   };
 });
 
-// Initialize auth on store creation
-const store = useAppStore.getState();
-store.init(); // This will call initAuth which sets up the auth listener
+// Initialize auth on store creation (client-side only)
+if (typeof window !== 'undefined') {
+  const store = useAppStore.getState();
+  store.init(); // This will call initAuth which sets up the auth listener
+}
