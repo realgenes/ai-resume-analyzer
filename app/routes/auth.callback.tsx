@@ -1,23 +1,25 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { supabase } from '~/lib/supabase'
+import { auth } from '~/lib/firebase'
+import { onAuthStateChanged } from 'firebase/auth'
 
 export default function AuthCallback() {
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Listen for auth state changes after OAuth redirect
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+    // Listen for auth state changes
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in
         navigate('/')
       } else {
+        // User is signed out
         navigate('/auth')
       }
     })
+
     // Cleanup subscription on unmount
-    return () => {
-      subscription.unsubscribe()
-    }
+    return () => unsubscribe()
   }, [navigate])
 
   return (

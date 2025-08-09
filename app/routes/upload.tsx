@@ -2,6 +2,7 @@ import {type FormEvent, useState} from 'react'
 import Navbar from "~/components/Navbar";
 import FileUploader from "~/components/FileUploader";
 import {AIProviderStatus} from "~/components/AIProviderStatus";
+import {StorageStatus} from "~/components/StorageStatus";
 import {useAppStore} from "~/lib/store";
 import {useNavigate} from "react-router";
 import {convertPdfToImage} from "~/lib/pdf2img";
@@ -67,7 +68,7 @@ const Upload = () => {
             const resumeText = await extractTextFromImage(imageFile.file);
 
             setStatusText('Analyzing with AI...');
-            const aiResponse = await analyzeResume(resumeText, jobDescription, jobTitle);
+            const aiResponse = await analyzeResume(imageFile.file, companyName, jobTitle, jobDescription);
             
             // Parse the AI response
             let feedback;
@@ -261,6 +262,7 @@ const Upload = () => {
                     {!isProcessing && (
             <div className="mb-8 space-y-4 w-full">
                             <AIProviderStatus />
+                            <StorageStatus />
                         </div>
                     )}
                     

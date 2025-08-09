@@ -1,0 +1,19 @@
+{
+  "projects": {
+    "default": "your-firebase-project-id"
+  },
+  "hosting": {
+    "public": "build/client",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

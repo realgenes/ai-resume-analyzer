@@ -21,8 +21,6 @@ import { aiService, type AIResponse } from "./ai";
 
 import { getURL } from './getURL';
 
-const SECURE_UPLOADS = import.meta.env.VITE_SECURE_UPLOADS === 'true';
-
 interface AppStore {
   // State
   user: User | null;
@@ -166,55 +164,26 @@ export const useAppStore = create<AppStore>((set, get) => {
   const uploadFile = async (file: File, bucket: string, path?: string): Promise<string | null> => {
     const { user } = get();
     if (!user) {
-      setError('User not authenticated. Please sign in to upload files.');
+      setError('User not authenticated');
       return null;
     }
 
     try {
-      if (SECURE_UPLOADS) {
-        const token = await auth.currentUser?.getIdToken();
-        if (!token) {
-          setError('Failed to get auth token');
-          return null;
-        }
-        const form = new FormData();
-        form.append('bucket', bucket);
-        if (path) form.append('path', path);
-        form.append('file', file);
-
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: form,
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Upload failed');
-        return data.path as string;
-      }
-
-      // Fallback: direct Supabase upload (requires permissive policies or Supabase auth)
+      // Include user ID in the path for security
       const fileName = path || `${Date.now()}-${file.name}`;
       const fullPath = `${user.uid}/${fileName}`;
+      
       const { data, error } = await supabase.storage
         .from(bucket)
         .upload(fullPath, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: false
         });
+      
       if (error) throw error;
       return data.path;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Upload failed';
-      if (errorMessage.includes('Bucket not found')) {
-        setError(`Storage bucket '${bucket}' not found. Please create the storage buckets in your Supabase dashboard.`);
-      } else if (errorMessage.includes('row-level security')) {
-        setError('Upload blocked by security policy. Enable secure uploads or adjust Storage policies.');
-      } else if (errorMessage.includes('File size')) {
-        setError('File is too large. Please choose a smaller file.');
-      } else {
-        setError(`Upload failed: ${errorMessage}`);
-      }
-      console.error('Upload error details:', error);
+      setError(error instanceof Error ? error.message : 'Upload failed');
       return null;
     }
   };
@@ -273,23 +242,6 @@ export const useAppStore = create<AppStore>((set, get) => {
 
     setLoading(true);
     try {
-      if (SECURE_UPLOADS) {
-        const token = await auth.currentUser?.getIdToken();
-        if (!token) throw new Error('Failed to get auth token');
-        const res = await fetch('/api/save-resume', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(resumeData),
-        });
-        const json = await res.json();
-        if (!res.ok) throw new Error(json.error || 'Failed to save resume');
-        set({ isLoading: false });
-        return json.id as string;
-      }
-
       const { data, error } = await supabase
         .from('resumes')
         .insert([
@@ -297,8 +249,8 @@ export const useAppStore = create<AppStore>((set, get) => {
             ...resumeData,
             user_id: user.uid,
             created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          },
+            updated_at: new Date().toISOString()
+          }
         ])
         .select()
         .single();

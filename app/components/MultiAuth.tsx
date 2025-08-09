@@ -1,55 +1,76 @@
 import { useState, useCallback, memo } from 'react';
 import { useAppStore } from '~/lib/store';
 import { EmailAuth } from './EmailAuth';
-
-import { getURL } from '~/lib/getURL';
+import { auth } from '~/lib/firebase';
+import { 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  TwitterAuthProvider,
+  GithubAuthProvider 
+} from 'firebase/auth';
 
 export const MultiAuth = memo(function MultiAuth() {
   const [authMethod, setAuthMethod] = useState<'oauth' | 'email'>('oauth');
-  const { signIn, isLoading } = useAppStore();
+  const { isLoading } = useAppStore();
 
-  // OAuth providers that work well with Supabase
+  // OAuth providers that work well with Firebase
   const oauthProviders = [
     { 
       id: 'google', 
       name: 'Google', 
       icon: '🔍',
-      setupNote: 'Easiest to set up - just enable in Supabase dashboard'
-    },
-    { 
-      id: 'discord', 
-      name: 'Discord', 
-      icon: '🎮',
-      setupNote: 'Popular with developers, easy OAuth setup'
+      setupNote: 'Easiest to set up - just enable in Firebase console'
     },
     { 
       id: 'twitter', 
       name: 'Twitter', 
       icon: '🐦',
       setupNote: 'Quick setup, works well'
+    },
+    { 
+      id: 'github', 
+      name: 'GitHub', 
+      icon: '�',
+      setupNote: 'Popular with developers, easy OAuth setup'
     }
   ];
 
-  const handleOAuthSignIn = useCallback(async (provider: string) => {
-    // Temporarily update the provider in your store
-    // You'll need to modify your signIn method to accept a provider parameter
+  const handleOAuthSignIn = useCallback(async (providerId: string) => {
     try {
-      const { supabase } = await import('~/lib/supabase');
-      const url = `${getURL()}auth/callback`;
-      console.log('🐛 DEBUG - OAuth redirect URL:', url);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider as any,
-        options: {
-          redirectTo: url
-        }
-      });
+      let provider;
       
-      if (error) {
-        console.error(`${provider} OAuth error:`, error.message);
-        alert(`${provider} authentication failed. Please check if ${provider} is enabled in your Supabase dashboard.`);
+      switch (providerId) {
+        case 'google':
+          provider = new GoogleAuthProvider();
+          provider.addScope('email');
+          provider.addScope('profile');
+          break;
+        case 'twitter':
+          provider = new TwitterAuthProvider();
+          break;
+        case 'github':
+          provider = new GithubAuthProvider();
+          break;
+        default:
+          throw new Error(`Unsupported provider: ${providerId}`);
       }
-    } catch (error) {
-      console.error(`${provider} OAuth error:`, error);
+
+      const result = await signInWithPopup(auth, provider);
+      console.log('✅ Authentication successful:', result.user.email);
+    } catch (error: any) {
+      console.error(`❌ ${providerId} authentication error:`, error.code, error.message);
+      
+      // User-friendly error messages
+      if (error.code === 'auth/popup-blocked') {
+        alert('Popup was blocked. Please allow popups for this site and try again.');
+      } else if (error.code === 'auth/popup-closed-by-user') {
+        // User cancelled - no need to show error
+        return;
+      } else if (error.code === 'auth/unauthorized-domain') {
+        alert('Domain not authorized. Please contact support.');
+      } else {
+        alert(`${providerId} authentication failed: ${error.message}`);
+      }
     }
   }, []);
 
@@ -108,8 +129,8 @@ export const MultiAuth = memo(function MultiAuth() {
             <div className="mt-6 p-4 bg-blue-50 rounded-md">
               <h4 className="font-medium text-blue-900 mb-2">Quick Setup Guide:</h4>
               <ol className="text-sm text-blue-800 space-y-1">
-                <li>1. Go to your Supabase Dashboard</li>
-                <li>2. Navigate to Authentication → Providers</li>
+                <li>1. Go to your Firebase Console</li>
+                <li>2. Navigate to Authentication → Sign-in method</li>
                 <li>3. Enable your preferred provider (Google is easiest)</li>
                 <li>4. Add the OAuth credentials from the provider</li>
               </ol>

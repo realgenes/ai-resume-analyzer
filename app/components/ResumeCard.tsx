@@ -50,9 +50,8 @@ const ResumeCard = ({ resume, onDelete }: { resume: ResumeData, onDelete?: () =>
             if (!resume.image_path) return;
             
             try {
-                const blob = await downloadFile('images', resume.image_path);
-                if (blob) {
-                    const url = URL.createObjectURL(blob);
+                const url = await downloadFile('images', resume.image_path);
+                if (url) {
                     setResumeUrl(url);
                 }
             } catch (error) {

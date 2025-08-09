@@ -39,9 +39,8 @@ const Resume = () => {
 
             // Download image file
             if(resumeData.image_path) {
-                const imageBlob = await downloadFile('images', resumeData.image_path);
-                if(imageBlob) {
-                    const imageUrl = URL.createObjectURL(imageBlob);
+                const imageUrl = await downloadFile('images', resumeData.image_path);
+                if (imageUrl) {
                     setImageUrl(imageUrl);
                 }
             }
