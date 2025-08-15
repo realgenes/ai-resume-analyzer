@@ -1,12 +1,12 @@
 import {type FormEvent, useState, useEffect} from 'react'
 import Navbar from "~/components/Navbar";
-import FileUploader from "~/components/FileUploader";
+import {LazyFileUploader, LazyComponentWrapper} from "~/lib/lazyComponents";
 import {AIProviderStatus} from "~/components/AIProviderStatus";
 import {StorageStatus} from "~/components/StorageStatus";
 import {useAppStore} from "~/lib/store";
 import {useNavigate} from "react-router";
-import {convertPdfToImage} from "~/lib/pdf2img";
-import {extractTextFromFile} from "~/lib/textExtraction";
+import {convertPdfToImage, cleanupPdfResources} from "~/lib/pdf2img.optimized";
+import {extractTextFromFile} from "~/lib/textExtraction.optimized";
 import {generateUUID} from "~/lib/utils";
 import {prepareInstructions} from "../../constants";
 
@@ -73,9 +73,18 @@ const Upload = () => {
             if (!imagePath) {
                 console.error('🔴 Image upload failed');
                 setStatusText('Error: Failed to upload image. Please check your internet connection and try again.');
+                // Clean up image resources on upload failure
+                if (imageFile.imageUrl) {
+                    cleanupPdfResources(imageFile.imageUrl);
+                }
                 return;
             }
             console.log('🟢 Image uploaded successfully:', imagePath);
+
+            // Clean up image resources after successful upload
+            if (imageFile.imageUrl) {
+                cleanupPdfResources(imageFile.imageUrl);
+            }
 
             setStatusText('Extracting text from file...');
             const resumeText = await extractTextFromFile(file);
@@ -325,7 +334,11 @@ const Upload = () => {
 
                             <div className="form-div">
                                 <label htmlFor="uploader">Upload Resume</label>
-                                <FileUploader onFileSelect={handleFileSelect} />
+                            <LazyComponentWrapper fallback={
+                                <div className="animate-pulse bg-gray-200 rounded-lg h-32 w-full"></div>
+                            }>
+                                <LazyFileUploader onFileSelect={handleFileSelect} />
+                            </LazyComponentWrapper>
                             </div>
 
                             <button 
