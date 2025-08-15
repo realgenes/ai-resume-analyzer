@@ -216,15 +216,15 @@ form {
 }
 
 .auth-form-header {
-  @apply mb-8 w-full;
+  @apply mb-2 w-full;
 }
 
 .auth-mode-tabs {
-  @apply flex bg-gray-100 rounded-xl p-1 mb-6 w-full;
+  @apply flex bg-gray-100 rounded-xl p-1 mb-4 w-full;
 }
 
 .auth-tab {
-  @apply flex-1 py-3 px-4 text-sm font-medium rounded-lg transition-all duration-200 text-center;
+  @apply flex-1 py-2 px-3 text-sm font-medium rounded-lg transition-all duration-200 text-center;
   @apply text-gray-600 hover:text-gray-900;
 }
 
@@ -237,7 +237,7 @@ form {
 }
 
 .auth-title h2 {
-  @apply text-2xl font-bold text-gray-900 mb-2;
+  @apply text-xl font-bold text-gray-900 mb-1;
 }
 
 .auth-title p {
@@ -245,7 +245,7 @@ form {
 }
 
 .auth-form {
-  @apply space-y-6 w-full;
+  @apply -space-y-1 w-full;
 }
 
 .auth-input-group {
@@ -265,7 +265,7 @@ form {
 }
 
 .auth-input {
-  @apply w-full pl-10 pr-12 py-3 border border-gray-300 rounded-xl;
+  @apply w-full pl-10 pr-12 py-2.5 border border-gray-300 rounded-xl;
   @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
   @apply text-gray-900 placeholder-gray-500 transition-all duration-200;
   @apply bg-white hover:border-gray-400;
@@ -286,7 +286,7 @@ form {
 }
 
 .auth-submit-button {
-  @apply w-full flex items-center justify-center gap-2 py-3 px-4;
+  @apply w-full flex items-center justify-center gap-2 py-2.5 px-4;
   @apply bg-indigo-600 hover:bg-indigo-700 focus:bg-indigo-700;
   @apply text-white font-medium rounded-xl;
   @apply focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2;
@@ -301,7 +301,7 @@ form {
 }
 
 .auth-footer {
-  @apply text-center pt-4 w-full;
+  @apply text-center pt-2 w-full;
 }
 
 .auth-link {

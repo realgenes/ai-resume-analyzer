@@ -19,12 +19,11 @@ const Auth = () => {
     }, [isAuthenticated, next])
 
     return (
-        <main className="bg-[url('/images/bg-auth.svg')] bg-cover min-h-screen flex items-center justify-center p-4">
+        <main className="bg-[url('/images/bg-auth.svg')] bg-cover min-h-screen flex items-center justify-center p-2">
             <div className="gradient-border shadow-xl w-full max-w-2xl">
-                <section className="flex flex-col gap-6 bg-white rounded-2xl p-6 sm:p-8 lg:p-10 w-full">
-                    <div className="flex flex-col items-center gap-3 text-center">
-                        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Welcome</h1>
-                        <h2 className="text-base sm:text-lg lg:text-xl text-gray-600 font-medium">Choose Your Sign In Method</h2>
+                <section className="flex flex-col gap-4 bg-white rounded-2xl p-4 sm:p-6 lg:p-8 w-full">
+                    <div className="flex flex-col items-center gap-2 text-center">
+                        <h1 className="text-xl sm:text-xl lg:text-xl font-bold text-gray-900">Welcome</h1>
                     </div>
                     
                     <MultiAuth />
