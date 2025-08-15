@@ -1,6 +1,8 @@
 import {type FormEvent, useState, useEffect} from 'react'
 import Navbar from "~/components/Navbar";
 import FileUploader from "~/components/FileUploader";
+import { LoadingSpinner } from "~/components/LoadingSpinner";
+import { UploadEmptyState } from "~/components/EmptyState";
 import {AIProviderStatus} from "~/components/AIProviderStatus";
 import {StorageStatus} from "~/components/StorageStatus";
 import {useAppStore} from "~/lib/store";
@@ -27,6 +29,40 @@ const Upload = () => {
     const handleFileSelect = (file: File | null) => {
         setFile(file)
     }
+
+    // Helper functions for progress tracking
+    const getProgressWidth = () => {
+        if (statusText.includes('Uploading the file')) return '20%';
+        if (statusText.includes('Converting to image')) return '40%';
+        if (statusText.includes('Extracting text')) return '60%';
+        if (statusText.includes('Analyzing')) return '80%';
+        if (statusText.includes('Saving')) return '90%';
+        if (statusText.includes('complete')) return '100%';
+        return '10%';
+    };
+
+    const getStepStatus = (step: string) => {
+        switch (step) {
+            case 'upload':
+                return statusText.includes('Uploading') || statusText.includes('Converting') || 
+                       statusText.includes('Extracting') || statusText.includes('Analyzing') || 
+                       statusText.includes('Saving') || statusText.includes('complete');
+            case 'convert':
+                return statusText.includes('Converting') || statusText.includes('Extracting') || 
+                       statusText.includes('Analyzing') || statusText.includes('Saving') || 
+                       statusText.includes('complete');
+            case 'extract':
+                return statusText.includes('Extracting') || statusText.includes('Analyzing') || 
+                       statusText.includes('Saving') || statusText.includes('complete');
+            case 'analyze':
+                return statusText.includes('Analyzing') || statusText.includes('Saving') || 
+                       statusText.includes('complete');
+            case 'save':
+                return statusText.includes('Saving') || statusText.includes('complete');
+            default:
+                return false;
+        }
+    };
 
     const handleAnalyze = async ({ 
         companyName, 
@@ -290,59 +326,161 @@ const Upload = () => {
     }
 
     return (
-    <main>
+    <main className="min-h-screen">
             <Navbar />
 
             <section className="main-section">
-        <div className="page-heading py-12 md:py-16">
-                    <h1>Smart feedback for your dream job</h1>
+                <div className="page-heading py-12 md:py-16 animate-fadeIn">
+                    <h1 className="animate-slideInUp">Smart feedback for your dream job</h1>
                     {isProcessing ? (
-                        <div className="text-center">
-                            <h2 className="mb-4">{statusText}</h2>
-                            <div className="mb-4">
-                                <div className="w-full bg-gray-200 rounded-full h-2.5">
-                                    <div className="bg-blue-600 h-2.5 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                        <div className="text-center space-y-6 animate-fadeIn">
+                            <h2 className="mb-4 animate-pulse">{statusText}</h2>
+                            
+                            {/* Enhanced progress bar with steps */}
+                            <div className="max-w-md mx-auto space-y-4">
+                                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                                    <div 
+                                        className="bg-gradient-to-r from-indigo-500 to-purple-500 h-3 rounded-full transition-all duration-500 ease-out animate-pulse" 
+                                        style={{width: getProgressWidth()}}
+                                    />
+                                </div>
+                                
+                                {/* Progress steps */}
+                                <div className="flex justify-between text-xs text-gray-600 dark:text-gray-400">
+                                    <span className={getStepStatus('upload') ? 'text-indigo-600 font-medium' : ''}>Upload</span>
+                                    <span className={getStepStatus('convert') ? 'text-indigo-600 font-medium' : ''}>Convert</span>
+                                    <span className={getStepStatus('extract') ? 'text-indigo-600 font-medium' : ''}>Extract</span>
+                                    <span className={getStepStatus('analyze') ? 'text-indigo-600 font-medium' : ''}>Analyze</span>
+                                    <span className={getStepStatus('save') ? 'text-indigo-600 font-medium' : ''}>Save</span>
                                 </div>
                             </div>
-                            <img src="/images/resume-scan.gif" className="w-full rounded-2xl shadow-lg" />
+                            
+                            {/* Enhanced loading animation */}
+                            <div className="relative max-w-lg mx-auto">
+                                <img 
+                                    src="/images/resume-scan.gif" 
+                                    className="w-full rounded-2xl shadow-2xl border border-gray-200/50 dark:border-gray-700/50" 
+                                    alt="Analyzing resume"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl" />
+                                <div className="absolute bottom-4 left-4 right-4">
+                                    <div className="bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm rounded-lg p-3">
+                                        <LoadingSpinner size="sm" text={statusText} />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     ) : (
-            <h2>Drop your resume for an ATS score and improvement tips</h2>
+                        <h2 className="animate-slideInUp animation-delay-200">Drop your resume for an ATS score and improvement tips</h2>
                     )}
                     
                     {!isProcessing && (
-            <div className="mb-8 space-y-4 w-full">
+                        <div className="mb-8 space-y-4 w-full animate-slideInUp animation-delay-400">
                             <AIProviderStatus />
                             <StorageStatus />
                         </div>
                     )}
                     
+                    {!isProcessing && !file && (
+                        <div className="animate-fadeIn animation-delay-600">
+                            <UploadEmptyState />
+                        </div>
+                    )}
+                    
                     {!isProcessing && (
-            <form id="upload-form" onSubmit={handleSubmit} className="card w-full max-w-2xl mx-auto p-6 sm:p-8 flex flex-col gap-4 mt-4">
-                            <div className="form-div">
-                                <label htmlFor="company-name">Company Name</label>
-                                <input type="text" name="company-name" placeholder="Company Name" id="company-name" required />
+                        <form 
+                            id="upload-form" 
+                            onSubmit={handleSubmit} 
+                            className="card w-full max-w-2xl mx-auto p-6 sm:p-8 flex flex-col gap-6 mt-8 animate-slideInUp animation-delay-500"
+                        >
+                            {/* Enhanced form with better spacing and visual hierarchy */}
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="form-div">
+                                    <label htmlFor="company-name" className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                        </svg>
+                                        Company Name
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="company-name" 
+                                        placeholder="e.g. Google, Microsoft, Apple" 
+                                        id="company-name" 
+                                        required 
+                                        className="focus:scale-[1.02] transition-transform duration-200"
+                                    />
+                                </div>
+                                <div className="form-div">
+                                    <label htmlFor="job-title" className="flex items-center gap-2">
+                                        <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2-2v2m8 0V6a2 2 0 00-2 2H10a2 2 0 00-2-2V6m8 0h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2" />
+                                        </svg>
+                                        Job Title
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        name="job-title" 
+                                        placeholder="e.g. Senior Software Engineer" 
+                                        id="job-title" 
+                                        required 
+                                        className="focus:scale-[1.02] transition-transform duration-200"
+                                    />
+                                </div>
                             </div>
+                            
                             <div className="form-div">
-                                <label htmlFor="job-title">Job Title</label>
-                                <input type="text" name="job-title" placeholder="Job Title" id="job-title" required />
-                            </div>
-                            <div className="form-div">
-                                <label htmlFor="job-description">Job Description</label>
-                                <textarea rows={5} name="job-description" placeholder="Job Description" id="job-description" required />
+                                <label htmlFor="job-description" className="flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Job Description
+                                </label>
+                                <textarea 
+                                    rows={6} 
+                                    name="job-description" 
+                                    placeholder="Paste the complete job description here. Include requirements, responsibilities, and qualifications for better analysis..." 
+                                    id="job-description" 
+                                    required 
+                                    className="focus:scale-[1.01] transition-transform duration-200 resize-none"
+                                />
                             </div>
 
                             <div className="form-div">
-                                <label htmlFor="uploader">Upload Resume</label>
+                                <label htmlFor="uploader" className="flex items-center gap-2">
+                                    <svg className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    Upload Resume
+                                </label>
                                 <FileUploader onFileSelect={handleFileSelect} />
                             </div>
 
                             <button 
-                className={`primary-button ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`primary-button group relative overflow-hidden ${
+                                    isProcessing ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98]'
+                                } transition-all duration-200`}
                                 type="submit"
                                 disabled={!file || isProcessing}
                             >
-                                {isProcessing ? 'Analyzing...' : 'Analyze Resume'}
+                                <span className="relative z-10 flex items-center justify-center gap-2">
+                                    {isProcessing ? (
+                                        <>
+                                            <LoadingSpinner size="sm" color="white" />
+                                            Analyzing...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-5 h-5 group-hover:rotate-12 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                            Analyze Resume
+                                        </>
+                                    )}
+                                </span>
+                                {!isProcessing && (
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                                )}
                             </button>
                         </form>
                     )}
