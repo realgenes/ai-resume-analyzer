@@ -1,12 +1,12 @@
 import {type FormEvent, useState, useEffect} from 'react'
 import Navbar from "~/components/Navbar";
-import {LazyFileUploader, LazyComponentWrapper} from "~/lib/lazyComponents";
+import FileUploader from "~/components/FileUploader";
 import {AIProviderStatus} from "~/components/AIProviderStatus";
 import {StorageStatus} from "~/components/StorageStatus";
 import {useAppStore} from "~/lib/store";
 import {useNavigate} from "react-router";
-import {convertPdfToImage, cleanupPdfResources} from "~/lib/pdf2img.optimized";
-import {extractTextFromFile} from "~/lib/textExtraction.optimized";
+import {convertPdfToImage} from "~/lib/pdf2img";
+import {extractTextFromFile} from "~/lib/textExtraction";
 import {generateUUID} from "~/lib/utils";
 import {prepareInstructions} from "../../constants";
 
@@ -75,7 +75,7 @@ const Upload = () => {
                 setStatusText('Error: Failed to upload image. Please check your internet connection and try again.');
                 // Clean up image resources on upload failure
                 if (imageFile.imageUrl) {
-                    cleanupPdfResources(imageFile.imageUrl);
+                    URL.revokeObjectURL(imageFile.imageUrl);
                 }
                 return;
             }
@@ -83,7 +83,7 @@ const Upload = () => {
 
             // Clean up image resources after successful upload
             if (imageFile.imageUrl) {
-                cleanupPdfResources(imageFile.imageUrl);
+                URL.revokeObjectURL(imageFile.imageUrl);
             }
 
             setStatusText('Extracting text from file...');
@@ -334,11 +334,7 @@ const Upload = () => {
 
                             <div className="form-div">
                                 <label htmlFor="uploader">Upload Resume</label>
-                            <LazyComponentWrapper fallback={
-                                <div className="animate-pulse bg-gray-200 rounded-lg h-32 w-full"></div>
-                            }>
-                                <LazyFileUploader onFileSelect={handleFileSelect} />
-                            </LazyComponentWrapper>
+                                <FileUploader onFileSelect={handleFileSelect} />
                             </div>
 
                             <button 
