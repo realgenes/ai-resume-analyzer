@@ -2,7 +2,6 @@ import { create } from "zustand";
 // Import Supabase for authentication and storage operations
 import { supabase, type ResumeData, type Profile } from "./supabase";
 import { aiService, type AIResponse } from "./ai";
-import { getURL } from './getURL';
 import type { User, Session } from '@supabase/supabase-js';
 
 const SECURE_UPLOADS = import.meta.env.VITE_SECURE_UPLOADS === 'true';
