@@ -23,12 +23,10 @@ export default function AuthCallback() {
         }
 
         if (data.session) {
-          console.log('✅ Session found, user authenticated')
           // Check auth status to sync with our store
           await checkAuthStatus()
           navigate('/')
         } else {
-          console.log('No session found, redirecting to auth')
           navigate('/auth')
         }
       } catch (error) {

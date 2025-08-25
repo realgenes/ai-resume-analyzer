@@ -52,16 +52,16 @@ export class AIService {
         body: JSON.stringify({
           prompt,
           config: {
-            model: config?.model || 'gemini-2.5-flash',
+            model: config?.model || 'gemini-1.5-flash', // Faster model
             temperature: config?.temperature || 0.7,
-            maxTokens: config?.maxTokens || 1000
+            maxTokens: config?.maxTokens || 2000 // Reduced for faster response
           }
         })
       });
 
-      // Add 60-second timeout for AI calls
+      // Add 45-second timeout for AI calls (reduced from 60s)
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('AI request timeout after 60 seconds')), 60000);
+        setTimeout(() => reject(new Error('AI request timeout after 45 seconds')), 45000);
       });
 
       console.log('🔵 Waiting for AI response...');
@@ -131,7 +131,7 @@ Return ONLY valid JSON (no markdown, no extra text):
   }
 }`
 
-    return await this.chat(analysisPrompt, { temperature: 0.1, maxTokens: 4000 })
+    return await this.chat(analysisPrompt, { temperature: 0.1, maxTokens: 3000 }) // Increased for better analysis
   }
 
   getAvailableProviders(): AIProvider[] {

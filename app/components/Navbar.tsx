@@ -11,7 +11,7 @@ const Navbar = () => {
     }, []);
 
     return (
-        <nav className="navbar group">
+        <nav className="navbar group bg-gray-300 shadow-2xl">
             <Link to="/" className="flex items-center gap-2 hover:scale-105 transition-transform duration-200">
                 <div className="size-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-400 shadow-md group-hover:shadow-lg transition-shadow duration-200" />
                 <p className="text-xl sm:text-2xl font-extrabold tracking-tight text-gradient">RESUMIND</p>

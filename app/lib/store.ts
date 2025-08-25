@@ -269,12 +269,13 @@ export const useAppStore = create<AppStore>((set, get) => {
         .from(bucket)
         .upload(fullPath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          duplex: 'half' // Enable streaming for better performance
         });
 
-      // Add timeout to prevent hanging - increased to 60 seconds for larger files
+      // Reduced timeout to 45 seconds for better user experience
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Upload timeout after 60 seconds. Please check your internet connection and try again.')), 60000);
+        setTimeout(() => reject(new Error('Upload timeout after 45 seconds. Please check your internet connection and try again.')), 45000);
       });
 
       console.log('🔵 Starting upload race between upload and timeout...');

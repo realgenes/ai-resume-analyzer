@@ -70,7 +70,7 @@ const ResumeCard = ({ resume, onDelete }: { resume: ResumeData, onDelete?: () =>
     }, [resume.image_path, downloadFile]);
 
     return (
-    <div className="resume-card group hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 animate-scaleIn relative">
+    <div className="w-sm p-6 rounded-2xl bg-gray-300 group hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 animate-scaleIn relative">
             <button
                 onClick={handleDelete}
                 disabled={isDeleting}

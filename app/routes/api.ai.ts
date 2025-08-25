@@ -9,7 +9,6 @@ export async function action({ request }: ActionFunctionArgs) {
     const { prompt, config } = await request.json();
     
     const geminiApiKey = process.env.GEMINI_API_KEY;
-    console.log('🔍 Checking Gemini API key...', geminiApiKey ? 'Present' : 'Missing');
     
     if (!geminiApiKey) {
       console.error('🔴 Gemini API key not found in environment variables');
@@ -22,8 +21,6 @@ export async function action({ request }: ActionFunctionArgs) {
     const model = config?.model || 'gemini-2.5-flash';
     const temperature = config?.temperature || 0.7;
     const maxTokens = config?.maxTokens || 1000;
-
-    console.log('🔵 Making request to Gemini API with model:', model);
 
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`, {
       method: 'POST',
@@ -55,7 +52,6 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 
     const data = await response.json();
-    console.log('🟢 Gemini API response received');
     
     if (!data.candidates || !data.candidates[0]?.content?.parts?.[0]?.text) {
       console.error('🔴 Invalid response format from Gemini API:', data);

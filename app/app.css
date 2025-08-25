@@ -89,20 +89,55 @@ h1 {
 }
 
 h2 {
-  @apply text-2xl md:text-3xl text-slate-600 dark:text-slate-300;
+  @apply text-2xl md:text-3xl text-slate-600 dark:text-slate-500;
 }
 
-label {
-  @apply text-slate-600 dark:text-slate-300;
-}
+
+/* Allow label color overrides */
 input {
-  @apply w-full p-4 rounded-2xl bg-white/80 dark:bg-slate-900/20 border border-slate-200/60 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors;
+  @apply w-full p-4 rounded-2xl bg-white dark:bg-slate-800/20 border border-slate-200/60 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors;
   /* Removed backdrop-blur for better performance */
+}
+
+/* Allow input width overrides */
+input[class*="w-"],
+input[class*="!w-"] {
+  width: unset !important;
+}
+
+/* Allow input background overrides */
+input[class*="bg-"] {
+  background-color: unset !important;
+}
+
+/* Allow input text color overrides */
+input[class*="text-"] {
+  color: unset !important;
 }
 
 textarea {
-  @apply w-full p-4 rounded-2xl bg-white/80 dark:bg-slate-900/50 border border-slate-200/60 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors;
+  @apply w-full p-4 rounded-2xl bg-white dark:bg-slate-900/50 border border-slate-200/60 dark:border-white/10 focus:outline-none focus:ring-2 focus:ring-primary-500/40 transition-colors;
   /* Removed backdrop-blur for better performance */
+}
+
+/* Allow textarea background overrides - more aggressive */
+textarea[class*="!bg-"],
+textarea[class*="bg-"] {
+  background-color: unset !important;
+  background: unset !important;
+}
+
+/* Allow textarea text color overrides - more aggressive */
+textarea[class*="!text-"],
+textarea[class*="text-"] {
+  color: unset !important;
+}
+
+/* Force override for specific textarea styling */
+textarea.force-override {
+  background-color: unset !important;
+  color: unset !important;
+  background: unset !important;
 }
 
 form {

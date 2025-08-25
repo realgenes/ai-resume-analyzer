@@ -48,12 +48,12 @@ export default function Home() {
 
     <section className="main-section">
       {/* Enhanced page heading with better typography and animations */}
-      <div className="page-heading py-12 md:py-16 animate-fadeIn">
+      <div className="page-heading  py-10 md:py-14 animate-fadeIn">
         <h1 className="animate-slideInUp">Track Your Applications & Resume Ratings</h1>
         {!loadingResumes && resumes?.length === 0 ? (
             <h2 className="animate-slideInUp animation-delay-200">Welcome to your resume dashboard!</h2>
         ): (
-          <h2 className="animate-slideInUp animation-delay-200">Review your submissions and check AI-powered feedback.</h2>
+          <h2 className="animate-slideInUp animation-delay-200 ">Review your submissions and check AI-powered feedback.</h2>
         )}
       </div>
 
@@ -73,16 +73,16 @@ export default function Home() {
 
       {/* Enhanced resumes grid with stagger animations */}
       {!loadingResumes && resumes.length > 0 && (
-        <div className="space-y-6 animate-fadeIn">
+        <div className="space-y-4 animate-fadeIn">
           {/* Stats bar */}
-          <div className="bg-white/80 dark:bg-gray-900/20 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 dark:border-white/10 animate-slideInUp">
+          <div className="bg-white/20 dark:bg-gray-500/30 backdrop-blur-sm rounded-2xl p-6 border border-gray-200/60 dark:border-white/10 animate-slideInUp shadow-gray-600 w-[60%] mx-auto mb-16">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Total Resumes</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white">{resumes.length}</p>
+                <p className="text-md text-gray-700 dark:text-gray-900">Total Resumes</p>
+                <p className="text-2xl font-bold text-gray-900 dark:text-black">{resumes.length}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600 dark:text-gray-400">Average Score</p>
+                <p className="text-md text-gray-600 dark:text-gray-600">Average Score</p>
                 <p className="text-2xl font-bold text-indigo-600">
                   {Math.round(resumes.reduce((acc, resume) => acc + (resume.feedback?.overallScore || 0), 0) / resumes.length)}
                 </p>
@@ -95,7 +95,7 @@ export default function Home() {
             {resumes.map((resume, index) => (
                 <div 
                   key={resume.id} 
-                  className="animate-slideInUp"
+                  className="animate-slideInUp ml-6"
                   style={{ 
                     animationDelay: `${index * 100}ms`,
                     animationFillMode: 'both'

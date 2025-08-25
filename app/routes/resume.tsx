@@ -62,30 +62,41 @@ const Resume = () => {
                 </Link>
             </nav>
             <div className="flex flex-row w-full max-lg:flex-col-reverse">
-                <section className="feedback-section bg-[url('/images/bg-small.svg') bg-cover h-[100vh] sticky top-0 items-center justify-center">
-                    {imageUrl && resumeUrl && (
-                        <div className="animate-in fade-in duration-1000 gradient-border max-sm:m-0 h-[90%] max-wxl:h-fit w-fit">
-                            <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
-                                <img
-                                    src={imageUrl}
-                                    className="w-full h-full object-contain rounded-2xl"
-                                    title="resume"
-                                />
-                            </a>
+                <section className="w-1/2 max-lg:w-full flex flex-col">
+                    {/* Resume Preview */}
+                    <div className="h-[100vh] sticky top-0 flex items-center justify-center bg-white">
+                        {imageUrl && resumeUrl && (
+                            <div className="animate-in fade-in duration-1000 gradient-border max-sm:m-0 h-[90%] max-wxl:h-fit w-fit">
+                                <a href={resumeUrl} target="_blank" rel="noopener noreferrer">
+                                    <img
+                                        src={imageUrl}
+                                        className="w-full h-full object-contain rounded-2xl"
+                                        title="resume"
+                                    />
+                                </a>
+                            </div>
+                        )}
+                    </div>
+                    {/* ATS Component below resume preview */}
+                    {feedback && (
+                        <div className="px-4 py-6 bg-white">
+                            <ATS score={feedback.ATS.score || 0} suggestions={feedback.ATS.tips || []} />
                         </div>
                     )}
                 </section>
-                <section className="feedback-section">
-                    <h2 className="text-4xl !text-black font-bold">Resume Review</h2>
-                    {feedback ? (
-                        <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
-                            <Summary feedback={feedback} />
-                            <ATS score={feedback.ATS.score || 0} suggestions={feedback.ATS.tips || []} />
-                            <Details feedback={feedback} />
-                        </div>
-                    ) : (
-                        <img src="/images/resume-scan-2.gif" className="w-full" />
-                    )}
+                <section className="w-1/2 max-lg:w-full flex flex-col">
+                    <div className="px-8 py-6 bg-white">
+                        <h2 className="text-4xl !text-black font-bold mb-8">Resume Review</h2>
+                        {feedback ? (
+                            <div className="flex flex-col gap-8 animate-in fade-in duration-1000">
+                                <Summary feedback={feedback} />
+                                {/* Details Component below summary */}
+                                <Details feedback={feedback} />
+                            </div>
+                        ) : (
+                            <img src="/images/resume-scan-2.gif" className="w-full" />
+                        )}
+                    </div>
                 </section>
             </div>
         </main>

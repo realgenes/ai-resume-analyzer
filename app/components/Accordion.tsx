@@ -156,11 +156,11 @@ export const AccordionContent: React.FC<AccordionContentProps> = ({
         <div
             className={`
         overflow-hidden transition-all duration-300 ease-in-out
-        ${isActive ? "max-h-fit opacity-100" : "max-h-0 opacity-0"}
+        ${isActive ? "max-h-[2000px] opacity-100" : "max-h-0 opacity-0"}
         ${className}
       `}
         >
-            <div className="px-4 py-3 ">{children}</div>
+            <div className="px-4 py-3">{children}</div>
         </div>
     );
 };

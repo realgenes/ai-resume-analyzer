@@ -48,7 +48,7 @@ const CategoryHeader = ({
 }) => {
   return (
       <div className="flex flex-row gap-4 items-center py-2">
-        <p className="text-2xl font-semibold">{title}</p>
+        <p className="text-2xl font-semibold text-gray-800">{title}</p>
         <ScoreBadge score={categoryScore} />
       </div>
   );
@@ -59,6 +59,14 @@ const CategoryContent = ({
                          }: {
   tips: { type: "good" | "improve"; tip: string; explanation: string }[];
 }) => {
+  if (!tips || tips.length === 0) {
+    return (
+      <div className="text-gray-500 text-sm">
+        No feedback available for this category.
+      </div>
+    );
+  }
+
   return (
       <div className="flex flex-col gap-4 items-center w-full">
         <div className="bg-gray-50 w-full rounded-lg px-5 py-4 grid grid-cols-2 gap-4">
@@ -116,8 +124,10 @@ const Details = ({ feedback }: { feedback: Feedback | undefined }) => {
   }
 
   return (
-      <div className="flex flex-col gap-4 w-full">
-        <Accordion>
+      <div className="flex flex-col gap-4 w-full bg-white rounded-2xl shadow-md p-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">Detailed Feedback</h3>
+        
+        <Accordion defaultOpen="tone-style">
           {feedback.toneAndStyle?.score !== undefined && (
             <AccordionItem id="tone-style">
               <AccordionHeader itemId="tone-style">
