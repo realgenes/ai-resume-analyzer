@@ -80,7 +80,6 @@ export const useAppStore = create<AppStore>((set, get) => {
         throw error;
       }
       
-      console.log('🐛 DEBUG - Google Auth successful');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'OAuth sign in failed');
     }
@@ -135,7 +134,6 @@ export const useAppStore = create<AppStore>((set, get) => {
           }
           
           if (!profileData) {
-            console.log('📝 Creating new profile for user...');
             // Create new profile
             profile = {
               id: user.id,
@@ -153,14 +151,12 @@ export const useAppStore = create<AppStore>((set, get) => {
               if (insertError) {
                 console.warn('⚠️ Could not create profile:', insertError);
               } else {
-                console.log('✅ Profile created successfully');
               }
             } catch (profileError) {
               console.warn('⚠️ Could not create profile (offline), using temporary profile:', profileError);
             }
           } else {
             profile = profileData;
-            console.log('✅ Profile loaded:', profile);
           }
 
           set({
@@ -208,13 +204,11 @@ export const useAppStore = create<AppStore>((set, get) => {
   // File Management Methods
   const testConnection = async (): Promise<boolean> => {
     try {
-      console.log('🔍 Testing Supabase connection...');
       const { data, error } = await supabase.storage.listBuckets();
       if (error) {
         console.error('🔴 Connection test failed:', error);
         return false;
       }
-      console.log('🟢 Connection test successful');
       return true;
     } catch (error) {
       console.error('🔴 Connection test error:', error);
@@ -224,13 +218,8 @@ export const useAppStore = create<AppStore>((set, get) => {
 
   const uploadFile = async (file: File, bucket: string, path?: string, retryCount = 0): Promise<string | null> => {
     const { user } = get();
-    console.log('🔵 Upload attempt - User:', user ? user.id : 'No user');
-    console.log('🔵 Upload attempt - File:', file.name, 'Size:', file.size, 'Type:', file.type);
-    console.log('🔵 Upload attempt - Bucket:', bucket);
-    console.log('🔵 Upload attempt - Retry count:', retryCount);
     
     if (!user) {
-      console.error('🔴 Upload failed: User not authenticated');
       setError('User not authenticated');
       return null;
     }
@@ -242,7 +231,6 @@ export const useAppStore = create<AppStore>((set, get) => {
     }
 
     // Don't set global loading state for individual file uploads
-    console.log('🔵 Starting upload process...');
     
     // Test connection before attempting upload
     if (retryCount === 0) {
@@ -261,8 +249,6 @@ export const useAppStore = create<AppStore>((set, get) => {
       const fileName = `${timestamp}_${randomId}_${sanitizedName}`;
       const fullPath = path ? `${path}/${fileName}` : `${user.id}/${fileName}`;
 
-      console.log('🔵 Upload path:', fullPath);
-      console.log('🔵 Calling supabase.storage.from(' + bucket + ').upload...');
 
       const uploadPromise = supabase.storage
         .from(bucket)
@@ -277,7 +263,6 @@ export const useAppStore = create<AppStore>((set, get) => {
         setTimeout(() => reject(new Error('Upload timeout after 45 seconds. Please check your internet connection and try again.')), 45000);
       });
 
-      console.log('🔵 Starting upload race between upload and timeout...');
       const result = await Promise.race([uploadPromise, timeoutPromise]) as any;
       
       // Check if the result is an error from timeout
@@ -286,10 +271,8 @@ export const useAppStore = create<AppStore>((set, get) => {
       }
 
       const { data, error } = result;
-      console.log('🔵 Upload response:', { data, error });
 
       if (error) {
-        console.error('🔴 Upload error:', error);
         
         // Provide more specific error messages
         if (error.message.includes('bucket')) {
@@ -305,10 +288,8 @@ export const useAppStore = create<AppStore>((set, get) => {
         throw error;
       }
 
-      console.log('🟢 Upload successful:', data.path);
       return data.path;
     } catch (error) {
-      console.error('🔴 Upload failed:', error);
       
       // Retry logic for network errors or timeouts
       const isRetryableError = error instanceof Error && (
@@ -319,7 +300,6 @@ export const useAppStore = create<AppStore>((set, get) => {
       );
       
       if (isRetryableError && retryCount < 2) {
-        console.log(`🔄 Retrying upload (attempt ${retryCount + 1}/3)...`);
         await new Promise(resolve => setTimeout(resolve, (retryCount + 1) * 2000)); // Progressive delay
         return uploadFile(file, bucket, path, retryCount + 1);
       }
@@ -532,8 +512,6 @@ export const useAppStore = create<AppStore>((set, get) => {
   const signUpWithEmail = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
-      console.log('🔵 Starting signup process for:', email);
-      console.log('🔵 Current origin:', window.location.origin);
       
       // Try signup without email confirmation first
       const { data, error } = await supabase.auth.signUp({
@@ -541,7 +519,6 @@ export const useAppStore = create<AppStore>((set, get) => {
         password
       });
 
-      console.log('🔵 Signup response:', { data, error });
 
       if (error) {
         console.error('🔴 Signup error:', error);
@@ -550,20 +527,17 @@ export const useAppStore = create<AppStore>((set, get) => {
 
       if (data.user) {
         if (data.user.email_confirmed_at) {
-          console.log('� User created and email confirmed:', data.user);
           set({ 
             error: 'Account created successfully! You can now sign in.',
             isLoading: false 
           });
         } else {
-          console.log('� User created but email not confirmed:', data.user);
           set({ 
             error: 'Account created! Please check your email for confirmation link, or try signing in if confirmation is disabled.',
             isLoading: false 
           });
         }
       } else {
-        console.log('🟡 User creation response unclear:', data);
         set({ 
           error: 'Account may have been created. Please try signing in.',
           isLoading: false 
@@ -685,11 +659,9 @@ export const useAppStore = create<AppStore>((set, get) => {
   };
 
   const init = () => {
-    console.log('🔥 Initializing Supabase auth listener...');
     
     // Check if already initialized to prevent duplicate listeners
     if (isInitialized) {
-      console.log('🟡 Already initialized, skipping duplicate init');
       return;
     }
     
@@ -697,10 +669,8 @@ export const useAppStore = create<AppStore>((set, get) => {
     
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔥 Auth state changed:', event, session ? session.user.email : 'signed out');
       
       if (session?.user) {
-        console.log('👤 User found, getting/creating profile...');
         
         try {
           // Get or create user profile from Supabase
@@ -718,7 +688,6 @@ export const useAppStore = create<AppStore>((set, get) => {
           }
           
           if (!profileData) {
-            console.log('📝 Creating new profile for user...');
             // Create new profile
             profile = {
               id: session.user.id,
@@ -736,17 +705,14 @@ export const useAppStore = create<AppStore>((set, get) => {
               if (insertError) {
                 console.warn('⚠️ Could not create profile:', insertError);
               } else {
-                console.log('✅ Profile created successfully');
               }
             } catch (profileError) {
               console.warn('⚠️ Could not create profile (offline), using temporary profile:', profileError);
             }
           } else {
             profile = profileData;
-            console.log('✅ Profile loaded:', profile);
           }
 
-          console.log('🔄 Setting user state...');
           set({
             user: session.user,
             session,
@@ -755,7 +721,6 @@ export const useAppStore = create<AppStore>((set, get) => {
             isLoading: false,
             error: null
           });
-          console.log('✅ User logged in successfully!');
           
         } catch (error) {
           console.error('❌ Error accessing Supabase:', error);
@@ -769,7 +734,6 @@ export const useAppStore = create<AppStore>((set, get) => {
             updated_at: new Date().toISOString()
           };
           
-          console.log('⚠️ Using fallback profile due to Supabase offline:', fallbackProfile);
           set({
             user: session.user,
             session,
@@ -778,10 +742,8 @@ export const useAppStore = create<AppStore>((set, get) => {
             isLoading: false,
             error: null
           });
-          console.log('✅ User logged in with fallback profile!');
         }
       } else {
-        console.log('👤 No user found, setting signed out state...');
         set({
           user: null,
           session: null,
@@ -793,7 +755,6 @@ export const useAppStore = create<AppStore>((set, get) => {
     });
 
     // Initial auth check
-    console.log('🔍 Performing initial auth check...');
     try {
       checkAuthStatus();
     } catch (error) {

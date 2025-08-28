@@ -42,7 +42,6 @@ export class AIService {
 
   private async chatViaServerAPI(prompt: string, config?: AIConfig): Promise<AIResponse> {
     try {
-      console.log('🔵 Starting AI API call...');
       
       const apiPromise = fetch('/api/ai', {
         method: 'POST',
@@ -64,7 +63,6 @@ export class AIService {
         setTimeout(() => reject(new Error('AI request timeout after 45 seconds')), 45000);
       });
 
-      console.log('🔵 Waiting for AI response...');
       const response = await Promise.race([apiPromise, timeoutPromise]);
 
       if (!response.ok) {
@@ -74,7 +72,6 @@ export class AIService {
       }
 
       const result = await response.json();
-      console.log('🟢 AI response received, length:', result.message?.content?.length || 0);
       return result;
     } catch (error) {
       console.error('🔴 Error calling AI API:', error);

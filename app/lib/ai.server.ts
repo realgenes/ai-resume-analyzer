@@ -91,34 +91,60 @@ export class AIService {
   }
 
   async analyzeResume(resumeText: string, jobDescription: string, jobTitle: string): Promise<AIResponse> {
-    const analysisPrompt = `Analyze this resume for "${jobTitle}" position. Job: ${jobDescription}
+    // Add timestamp to ensure unique analysis each time
+    const timestamp = Date.now();
+    const analysisId = Math.random().toString(36).substr(2, 9);
+    
+    const analysisPrompt = `ANALYSIS ID: ${analysisId} | TIMESTAMP: ${timestamp}
 
-Resume: ${resumeText}
+You are an expert resume analyzer. Your task is to provide a UNIQUE, DETAILED analysis for this specific resume and job combination.
 
-Return ONLY valid JSON (no markdown, no extra text):
+CRITICAL: Do NOT copy any example scores or template values. Analyze the actual resume content and job description provided below.
+
+JOB TITLE: ${jobTitle}
+JOB DESCRIPTION: ${jobDescription}
+
+RESUME CONTENT TO ANALYZE:
+${resumeText}
+
+INSTRUCTIONS:
+1. Read the resume content carefully
+2. Compare it against the job requirements
+3. Calculate scores based on ACTUAL content quality and job fit
+4. Provide specific, actionable feedback
+5. Extract real keywords from both resume and job description
+
+REQUIRED OUTPUT FORMAT (JSON only, no markdown):
 {
-  "overall_score": 85,
-  "ats_score": 82,
-  "summary": "Brief assessment here",
-  "strengths": ["strength 1", "strength 2"],
-  "weaknesses": ["weakness 1", "weakness 2"],
-  "suggestions": ["suggestion 1", "suggestion 2"],
+  "overall_score": [CALCULATED SCORE 0-100],
+  "ats_score": [CALCULATED SCORE 0-100],
+  "summary": "[SPECIFIC assessment based on this resume]",
+  "strengths": ["[ACTUAL strength from resume content]"],
+  "weaknesses": ["[ACTUAL weakness from resume content]"],
+  "suggestions": ["[ACTIONABLE suggestion for this resume]"],
   "ATS": {
-    "score": 82,
-    "tips": ["tip 1", "tip 2"]
+    "score": [CALCULATED SCORE 0-100],
+    "tips": ["[SPECIFIC ATS tip for this resume]"]
   },
-  "keywords_found": ["keyword1", "keyword2"],
-  "keywords_missing": ["missing1", "missing2"],
+  "keywords_found": ["[KEYWORDS ACTUALLY IN RESUME]"],
+  "keywords_missing": ["[KEYWORDS FROM JOB DESC MISSING IN RESUME]"],
   "sections": {
-    "contact": {"score": 85, "feedback": "feedback"},
-    "summary": {"score": 80, "feedback": "feedback"},
-    "experience": {"score": 90, "feedback": "feedback"},
-    "education": {"score": 75, "feedback": "feedback"},
-    "skills": {"score": 88, "feedback": "feedback"}
+    "contact": {"score": [SCORE], "feedback": "[SPECIFIC feedback]"},
+    "summary": {"score": [SCORE], "feedback": "[SPECIFIC feedback]"},
+    "experience": {"score": [SCORE], "feedback": "[SPECIFIC feedback]"},
+    "education": {"score": [SCORE], "feedback": "[SPECIFIC feedback]"},
+    "skills": {"score": [SCORE], "feedback": "[SPECIFIC feedback]"}
   }
-}`
+}
 
-    return await this.chat(analysisPrompt, { temperature: 0.1, maxTokens: 4000 })
+SCORING RULES:
+- overall_score: Based on job fit + resume quality (0-100)
+- ats_score: Based on keyword matching + formatting (0-100)
+- Higher scores for resumes that closely match job requirements
+- Lower scores for generic or poorly matched resumes
+- Be objective and specific in your analysis`
+
+    return await this.chat(analysisPrompt, { temperature: 0.3, maxTokens: 4000 })
   }
 
   getAvailableProviders(): AIProvider[] {

@@ -33,7 +33,6 @@ export const MultiAuth = memo(function MultiAuth() {
           throw new Error(`Unsupported provider: ${providerId}`);
       }
 
-      console.log('✅ Authentication successful');
     } catch (error: any) {
       console.error(`❌ ${providerId} authentication error:`, error.message);
       

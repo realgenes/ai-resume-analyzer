@@ -38,7 +38,6 @@ async function loadPdfJs(): Promise<any> {
 // Optimized PDF to image conversion with memory management
 export async function convertPdfToImage(file: File): Promise<PdfConversionResult> {
     try {
-        console.log('🔵 Starting optimized PDF conversion...');
         
         // Load PDF.js library lazily
         const pdfjsLib = await loadPdfJs();
@@ -55,7 +54,6 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
             )
         ]);
 
-        console.log('🔵 PDF loaded, converting first page...');
         
         // Get only the first page for performance
         const page = await pdf.getPage(1);
@@ -91,7 +89,6 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
             )
         ]);
 
-        console.log('🔵 PDF rendered, converting to blob...');
 
         // Convert to blob with optimized quality settings
         const blob = await new Promise<Blob>((resolve, reject) => {
@@ -116,7 +113,6 @@ export async function convertPdfToImage(file: File): Promise<PdfConversionResult
         canvas.width = 0;
         canvas.height = 0;
 
-        console.log('🟢 PDF conversion completed successfully');
         
         return {
             imageUrl,

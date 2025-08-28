@@ -22,7 +22,6 @@ class PerformanceMonitor {
       startTime,
       memory: this.getMemoryUsage()
     });
-    console.log(`🔵 Performance: Starting ${name}`);
   }
 
   // End timing an operation
@@ -47,9 +46,8 @@ class PerformanceMonitor {
     
     // Log performance info
     if (duration > 1000) {
-      console.warn(`🟡 Performance: ${name} took ${duration.toFixed(2)}ms (slow)`);
+      // console.warn(`🟡 Performance: ${name} took ${duration.toFixed(2)}ms (slow)`);
     } else {
-      console.log(`🟢 Performance: ${name} completed in ${duration.toFixed(2)}ms`);
     }
 
     return updatedMetric;
@@ -88,20 +86,17 @@ class PerformanceMonitor {
     const completedMetrics = allMetrics.filter(m => m.duration !== undefined);
     
     console.group('📊 Performance Summary');
-    console.log(`Total operations: ${allMetrics.length}`);
-    console.log(`Completed operations: ${completedMetrics.length}`);
     
     if (completedMetrics.length > 0) {
       const totalTime = completedMetrics.reduce((sum, m) => sum + (m.duration || 0), 0);
       const avgTime = totalTime / completedMetrics.length;
-      console.log(`Average duration: ${avgTime.toFixed(2)}ms`);
       
       const slowOps = this.getSlowOperations();
       if (slowOps.length > 0) {
-        console.warn(`Slow operations (>1s): ${slowOps.length}`);
-        slowOps.forEach(op => {
-          console.warn(`  - ${op.name}: ${op.duration?.toFixed(2)}ms`);
-        });
+        // console.warn(`Slow operations (>1s): ${slowOps.length}`);
+        // slowOps.forEach(op => {
+        //   console.warn(`  - ${op.name}: ${op.duration?.toFixed(2)}ms`);
+        // });
       }
     }
     console.groupEnd();

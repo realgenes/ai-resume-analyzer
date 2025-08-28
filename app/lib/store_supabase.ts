@@ -77,7 +77,6 @@ export const useAppStore = create<AppStore>((set, get) => {
         throw error;
       }
       
-      console.log('🐛 DEBUG - Google Auth successful');
     } catch (error) {
       setError(error instanceof Error ? error.message : 'OAuth sign in failed');
     }
@@ -132,7 +131,6 @@ export const useAppStore = create<AppStore>((set, get) => {
           }
           
           if (!profileData) {
-            console.log('📝 Creating new profile for user...');
             // Create new profile
             profile = {
               id: user.id,
@@ -150,14 +148,12 @@ export const useAppStore = create<AppStore>((set, get) => {
               if (insertError) {
                 console.warn('⚠️ Could not create profile:', insertError);
               } else {
-                console.log('✅ Profile created successfully');
               }
             } catch (profileError) {
               console.warn('⚠️ Could not create profile (offline), using temporary profile:', profileError);
             }
           } else {
             profile = profileData;
-            console.log('✅ Profile loaded:', profile);
           }
 
           set({
@@ -573,14 +569,11 @@ export const useAppStore = create<AppStore>((set, get) => {
   };
 
   const init = () => {
-    console.log('🔥 Initializing Supabase auth listener...');
     
     // Listen for auth state changes
     supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('🔥 Auth state changed:', event, session ? session.user.email : 'signed out');
       
       if (session?.user) {
-        console.log('👤 User found, getting/creating profile...');
         
         try {
           // Get or create user profile from Supabase
@@ -598,7 +591,6 @@ export const useAppStore = create<AppStore>((set, get) => {
           }
           
           if (!profileData) {
-            console.log('📝 Creating new profile for user...');
             // Create new profile
             profile = {
               id: session.user.id,
@@ -616,17 +608,14 @@ export const useAppStore = create<AppStore>((set, get) => {
               if (insertError) {
                 console.warn('⚠️ Could not create profile:', insertError);
               } else {
-                console.log('✅ Profile created successfully');
               }
             } catch (profileError) {
               console.warn('⚠️ Could not create profile (offline), using temporary profile:', profileError);
             }
           } else {
             profile = profileData;
-            console.log('✅ Profile loaded:', profile);
           }
 
-          console.log('🔄 Setting user state...');
           set({
             user: session.user,
             session,
@@ -635,7 +624,6 @@ export const useAppStore = create<AppStore>((set, get) => {
             isLoading: false,
             error: null
           });
-          console.log('✅ User logged in successfully!');
           
         } catch (error) {
           console.error('❌ Error accessing Supabase:', error);
@@ -649,7 +637,6 @@ export const useAppStore = create<AppStore>((set, get) => {
             updated_at: new Date().toISOString()
           };
           
-          console.log('⚠️ Using fallback profile due to Supabase offline:', fallbackProfile);
           set({
             user: session.user,
             session,
@@ -658,10 +645,8 @@ export const useAppStore = create<AppStore>((set, get) => {
             isLoading: false,
             error: null
           });
-          console.log('✅ User logged in with fallback profile!');
         }
       } else {
-        console.log('👤 No user found, setting signed out state...');
         set({
           user: null,
           session: null,
@@ -673,7 +658,6 @@ export const useAppStore = create<AppStore>((set, get) => {
     });
 
     // Initial auth check
-    console.log('🔍 Performing initial auth check...');
     try {
       checkAuthStatus();
     } catch (error) {

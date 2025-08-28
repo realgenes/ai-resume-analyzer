@@ -27,12 +27,10 @@ async function loadPdfJsOptimized(): Promise<any> {
 // Optimized PDF text extraction with chunked processing
 export async function extractTextFromPDF(file: File): Promise<string> {
     try {
-        console.log('🔵 Starting optimized PDF text extraction...');
         
         // Load PDF.js library lazily
         const pdfjsLib = await loadPdfJsOptimized();
 
-        console.log('🔵 Loading PDF document...');
         const arrayBuffer = await file.arrayBuffer();
         
         // Load PDF with timeout
@@ -43,7 +41,6 @@ export async function extractTextFromPDF(file: File): Promise<string> {
             )
         ]);
         
-        console.log('🔵 PDF loaded, pages:', pdf.numPages);
         
         // Process pages in chunks to avoid memory issues
         const CHUNK_SIZE = 3; // Process 3 pages at a time
@@ -51,7 +48,6 @@ export async function extractTextFromPDF(file: File): Promise<string> {
         
         for (let startPage = 1; startPage <= pdf.numPages; startPage += CHUNK_SIZE) {
             const endPage = Math.min(startPage + CHUNK_SIZE - 1, pdf.numPages);
-            console.log(`🔵 Processing pages ${startPage}-${endPage} of ${pdf.numPages}`);
             
             // Process chunk of pages in parallel
             const pagePromises = [];
@@ -68,7 +64,6 @@ export async function extractTextFromPDF(file: File): Promise<string> {
             }
         }
         
-        console.log('🟢 Text extraction complete, length:', fullText.length);
         return fullText.trim();
         
     } catch (error) {
