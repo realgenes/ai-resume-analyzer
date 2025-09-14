@@ -89,18 +89,6 @@ GEMINI_API_KEY=your_gemini_api_key
 
 ## 🚢 Production Deployment
 
-### Using Docker
-
-1. **Build the Docker image**
-
-   ```bash
-   docker build -t ai-resume-analyzer .
-   ```
-
-2. **Run the container**
-   ```bash
-   docker run -p 3000:3000 ai-resume-analyzer
-   ```
 
 ### Manual Deployment
 
